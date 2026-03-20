@@ -1,11 +1,15 @@
 import { useTranslation } from '../LanguageContext';
 
-export default function Footer() {
+export default function Footer({ isCagliariPage }) {
     const { t } = useTranslation();
     const year = new Date().getFullYear();
 
     const scrollTo = (id) => {
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        if (isCagliariPage) {
+            window.location.href = `./index.html#${id}`;
+        } else {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        }
     };
 
     return (

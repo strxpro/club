@@ -401,5 +401,44 @@ export const translations = {
     },
     footer_passion: {
         it: 'Passione per il Cagliari Calcio', en: 'Passion for Cagliari Calcio', pl: 'Pasja do Cagliari Calcio', de: 'Leidenschaft für Cagliari Calcio', es: 'Pasión por el Cagliari Calcio', fr: 'Passion pour le Cagliari Calcio'
-    }
+    },
+
+    // ─── CAGLIARI STATS ───
+    cagliari_stats_title: {
+        it: 'Statistiche Attuali', en: 'Current Statistics', pl: 'Aktualne Statystyki', de: 'Aktuelle Statistiken', es: 'Estadísticas Actuales', fr: 'Statistiques Actuelles'
+    },
+    cagliari_change_season: {
+        it: 'Cambia Stagione:', en: 'Change Season:', pl: 'Zmień Sezon:', de: 'Saison Ändern:', es: 'Cambiar Temporada:', fr: 'Changer de Saison:'
+    },
+    cagliari_back: {
+        it: 'Indietro', en: 'Back', pl: 'Wróć', de: 'Zurück', es: 'Volver', fr: 'Retour'
+    },
+    cagliari_table: {
+        it: 'Classifica Serie A', en: 'Serie A Table', pl: 'Tabela Serie A', de: 'Serie A Tabelle', es: 'Clasificación Serie A', fr: 'Classement Serie A'
+    },
+    cagliari_last_match: {
+        it: 'Ultima Partita', en: 'Last Match', pl: 'Ostatni Mecz', de: 'Letztes Spiel', es: 'Último Partido', fr: 'Dernier Match'
+    },
+    cagliari_live_match: {
+        it: 'Partita in Diretta', en: 'Live Match', pl: 'Mecz na Żywo', de: 'Live-Spiel', es: 'Partido en Vivo', fr: 'Match en Direct'
+    },
+    cagliari_next_match: {
+        it: 'Prossima Partita', en: 'Next Match', pl: 'Najbliższy Mecz', de: 'Nächstes Spiel', es: 'Próximo Partido', fr: 'Prochain Match'
+    },
+    cagliari_no_live: {
+        it: 'Attualmente il Cagliari non sta giocando alcuna partita.', en: 'Cagliari is not playing any match currently.', pl: 'Aktualnie Cagliari non rozgrywa żadnego spotkania.', de: 'Cagliari spielt derzeit kein Spiel.', es: 'El Cagliari no está jugando ningún partido actualmente.', fr: 'Cagliari ne joue aucun match pour le moment.'
+    },
+    cagliari_starting_xi: {
+        it: 'Formazione Titolare', en: 'Starting XI', pl: 'Wyjściowa Jedenastka', de: 'Startelf', es: 'Once Inicial', fr: 'Onze de Départ'
+    },
+    cagliari_substitutes: {
+        it: 'Sostituti', en: 'Substitutes', pl: 'Rezerwowi', de: 'Auswechselspieler', es: 'Sustitutos', fr: 'Remplaçants'
+    },
+    cagliari_squad: {
+        it: 'Rosa della Squadra', en: 'Team Squad', pl: 'Kadra Zespołu', de: 'Mannschaftskader', es: 'Plantilla del Equipo', fr: 'Effectif de l\'Équipe'
+    },
+    cagliari_position_G: { it: 'Portiere', en: 'Goalkeeper', pl: 'Bramkarz', de: 'Torwart', es: 'Portero', fr: 'Gardien' },
+    cagliari_position_D: { it: 'Difensore', en: 'Defender', pl: 'Obrońca', de: 'Verteidiger', es: 'Defensa', fr: 'Défenseur' },
+    cagliari_position_M: { it: 'Centrocampista', en: 'Midfielder', pl: 'Pomocnik', de: 'Mittelfeldspieler', es: 'Centrocampista', fr: 'Milieu' },
+    cagliari_position_A: { it: 'Attaccante', en: 'Attacker', pl: 'Napastnik', de: 'Stürmer', es: 'Delantero', fr: 'Attaquant' }
 };
