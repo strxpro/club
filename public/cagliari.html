@@ -695,6 +695,9 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Tymczasowo wymuś odświeżenie cache zgodnie z zaleceniami
+            localStorage.clear();
+
             loadStandings();
             loadFixtures();
             loadSquad();
