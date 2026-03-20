@@ -300,10 +300,10 @@ export default function History() {
                                             >
                                                     <div className="flex flex-col md:flex-row w-full gap-4 md:gap-[4%] max-h-[75vh] md:max-h-none overflow-y-auto md:overflow-visible pb-[80px] md:pb-0" style={{ width: '100%', alignItems: 'center', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                                                         <style>{`::-webkit-scrollbar { display: none; }`}</style>
-                                                        <div className={`w-full md:w-[48%] ${expandedEntries[i] ? 'min-h-[15vh]' : 'min-h-[25vh]'} md:!h-[50vh] shrink-0 rounded-[8px] overflow-hidden shadow-[0_8px_60px_rgba(0,0,0,0.5)] transition-all duration-700 ease-in-out`}>
+                                                        <div className={`w-full md:w-[48%] ${expandedEntries[i] && isMobile ? 'min-h-[15vh] max-h-[15vh]' : 'min-h-[25vh] max-h-[35vh]'} md:max-h-none md:!h-[50vh] shrink-0 rounded-[8px] overflow-hidden shadow-[0_8px_60px_rgba(0,0,0,0.5)] transition-all duration-700 ease-in-out`}>
                                                             <img src={entry.img} alt={entry.subtitle} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'grayscale(60%) contrast(1.08)' }} />
                                                         </div>
-                                                    <div className="flex-1 flex flex-col justify-center text-center md:text-left items-center md:items-start mt-2 md:mt-0 px-2 md:px-0">
+                                                    <div className="flex-1 flex flex-col justify-center text-center md:text-left items-center md:items-start mt-2 md:mt-0 px-6 sm:px-12 md:px-0 transition-all duration-500 ease-in-out w-full">
                                                         <div style={{ fontSize: 'clamp(3.5rem, 6vw, 6rem)', fontWeight: 900, color: '#ffffff', lineHeight: 1, marginBottom: '12px', letterSpacing: '-0.03em', fontFamily: "'Inter', sans-serif" }}>
                                                             {entry.year}
                                                         </div>
@@ -311,12 +311,14 @@ export default function History() {
                                                         <div style={{ fontSize: 'clamp(1rem, 1.8vw, 1.3rem)', fontWeight: 600, color: '#8899aa', marginBottom: '12px', letterSpacing: '0.03em' }}>
                                                             {entry.subtitle}
                                                         </div>
-                                                        <div style={{ fontSize: 'clamp(0.85rem, 1.2vw, 1rem)', lineHeight: 1.8, color: '#6a7a8a', maxWidth: '440px' }}>
-                                                            {expandedEntries[i] ? entry.text : (entry.text.length > 150 ? entry.text.substring(0, 150) + '...' : entry.text)}
-                                                            {entry.text.length > 150 && (
+                                                        <div style={{ fontSize: 'clamp(0.85rem, 1.2vw, 1rem)', lineHeight: 1.8, color: '#6a7a8a', maxWidth: '440px', width: '100%' }}>
+                                                            {(!isMobile || expandedEntries[i] || entry.text.length <= 150) 
+                                                                ? entry.text 
+                                                                : entry.text.substring(0, 150) + '...'}
+                                                            {(isMobile && entry.text.length > 150) && (
                                                                 <span 
                                                                     onClick={() => toggleReadMore(i)} 
-                                                                    className="ml-2 font-semibold text-crimson cursor-pointer hover:underline pointer-events-auto"
+                                                                    className="ml-2 font-semibold text-crimson cursor-pointer hover:underline pointer-events-auto inline-block"
                                                                 >
                                                                     {expandedEntries[i] ? t('history_read_less') : t('history_read_more')}
                                                                 </span>
