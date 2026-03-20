@@ -45,7 +45,7 @@ const FIFA_CARD_STYLES = "relative w-24 h-36 md:w-28 md:h-40 bg-gradient-to-br f
 
 export default function CagliariStats() {
     const { t, language } = useTranslation();
-    const [currentSeason, setCurrentSeason] = useState(2024);
+    const [currentSeason, setCurrentSeason] = useState(2025);
     
     // State
     const [loading, setLoading] = useState(true);
@@ -56,6 +56,7 @@ export default function CagliariStats() {
     const [startingXI, setStartingXI] = useState([]);
     const [substitutes, setSubstitutes] = useState([]);
     const [squadFallback, setSquadFallback] = useState([]);
+    const [apiError, setApiError] = useState(null);
 
     const handleSeasonChange = (e) => {
         setCurrentSeason(parseInt(e.target.value));
@@ -79,6 +80,13 @@ export default function CagliariStats() {
 
                 // 2. Fetch Fixtures
                 const fixturesData = await fetchWithCache(`/fixtures?team=${TEAM_ID}&season=${currentSeason}`, forceRefresh);
+                if (fixturesData.errors && Object.keys(fixturesData.errors).length > 0) {
+                    if (isMounted) setApiError(Object.values(fixturesData.errors).join(' | '));
+                    if (isMounted) setLoading(false);
+                    return;
+                }
+                if (isMounted) setApiError(null);
+                
                 let liver = null;
                 let lastr = null;
                 if (fixturesData.response) {
@@ -202,11 +210,17 @@ export default function CagliariStats() {
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Header & Season Selector */}
-            <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6 bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-sm">
-                <div className="flex flex-col sm:flex-row items-center gap-4 bg-black/40 px-6 py-3 rounded-xl border border-white/10 shadow-inner">
-                    <span className="text-[10px] text-white/50 font-bold tracking-wider uppercase">{t('cagliari_change_season')}</span>
+            <div className="flex flex-col items-center text-center mb-12 gap-8 bg-white/5 p-8 rounded-3xl border border-white/10 backdrop-blur-sm">
+                <div>
+                    <span className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-bold tracking-[0.2em] text-white/50 mb-4">SEZON {currentSeason} / {currentSeason+1}</span>
+                    <h2 className="text-5xl md:text-7xl font-heading text-white tracking-widest uppercase">
+                        {t('cagliari_stats_title').split(' ')[0]} <span className="text-crimson">{t('cagliari_stats_title').split(' ').slice(1).join(' ')}</span>
+                    </h2>
+                </div>
+                <div className="flex flex-col mx-auto sm:flex-row items-center gap-4 bg-black/50 px-8 py-4 rounded-2xl border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+                    <span className="text-xs text-white/50 font-bold tracking-widest uppercase">{t('cagliari_change_season')}</span>
                     <select 
-                        className="bg-transparent text-white font-bold outline-none cursor-pointer text-base md:text-lg"
+                        className="bg-transparent text-white font-bold outline-none cursor-pointer text-xl"
                         value={currentSeason}
                         onChange={handleSeasonChange}
                     >
@@ -215,19 +229,17 @@ export default function CagliariStats() {
                         <option value="2025" className="text-black">2025 / 2026</option>
                     </select>
                 </div>
-                
-                <div className="text-center">
-                    <span className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-bold tracking-[0.2em] text-white/50 mb-3">SEZON {currentSeason} / {currentSeason+1}</span>
-                    <h2 className="text-4xl md:text-6xl font-heading text-white tracking-widest uppercase">
-                        {t('cagliari_stats_title').split(' ')[0]} <span className="text-crimson">{t('cagliari_stats_title').split(' ').slice(1).join(' ')}</span>
-                    </h2>
-                </div>
-                <div className="hidden md:block w-32"></div> {/* Spacer to center title correctly */}
             </div>
 
             {loading ? (
                 <div className="flex justify-center items-center h-64">
                     <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-crimson"></div>
+                </div>
+            ) : apiError ? (
+                <div className="bg-red-900/40 border border-red-500 text-white p-12 rounded-3xl text-center max-w-3xl mx-auto shadow-[0_0_50px_rgba(220,20,60,0.3)]">
+                    <h3 className="text-xl md:text-3xl font-bold mb-4 font-heading tracking-widest text-red-400">🚨 API LIMIT OR PLAN RESTRICTION</h3>
+                    <p className="text-lg opacity-90">{apiError}</p>
+                    <p className="mt-6 text-sm opacity-50 font-bold">Please select an older season (e.g., 2024) from the dropdown above to continue viewing stats if your plan blocked 2025 access.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -247,8 +259,8 @@ export default function CagliariStats() {
                                     <thead className="text-white/40 border-b border-white/5">
                                         <tr>
                                             <th className="pb-3 pl-2">#</th>
-                                            <th className="pb-3">Drużyna / Team</th>
-                                            <th className="pb-3 text-center">M</th>
+                                            <th className="pb-3">Team</th>
+                                            <th className="pb-3 text-center">G</th>
                                             <th className="pb-3 text-center">Pts</th>
                                         </tr>
                                     </thead>

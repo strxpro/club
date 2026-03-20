@@ -45,8 +45,8 @@ export default function Navbar({ isCagliariPage }) {
 
     return (
         <nav
-            className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled ? 'nav-glass' : 'bg-transparent'}`}
-            style={scrolled ? { boxShadow: '0 4px 30px rgba(255,255,255,0.04), 0 1px 0 rgba(255,255,255,0.06)' } : {}}
+            className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled || isCagliariPage ? 'nav-glass' : 'bg-transparent'}`}
+            style={scrolled || isCagliariPage ? { boxShadow: '0 4px 30px rgba(255,255,255,0.04), 0 1px 0 rgba(255,255,255,0.06)' } : {}}
         >
             <div className="container-main flex items-center justify-between h-20 md:h-24 transition-all duration-300">
                 {/* Logo */}
