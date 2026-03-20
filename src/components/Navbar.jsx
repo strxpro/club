@@ -72,7 +72,7 @@ export default function Navbar() {
                             className="flex items-center justify-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-white/10 cursor-pointer active:scale-95 group focus:outline-none"
                             aria-label="Language"
                         >
-                            <div className="w-6 sm:w-8 h-4 sm:h-5 rounded overflow-hidden flex items-center justify-center ring-1 ring-white/10">
+                            <div className="w-8 h-5 rounded overflow-hidden flex items-center justify-center ring-1 ring-white/10">
                                 <img
                                     src={LANGUAGE_LABELS[language]}
                                     alt={language}
@@ -161,28 +161,72 @@ export default function Navbar() {
                 </div>
             </div>
 
-            {/* Mobile Overlay */}
-            {mobileOpen && (
-                <div className="md:hidden fixed inset-0 bg-black/60 z-[998]" onClick={() => setMobileOpen(false)} />
-            )}
+            {/* Mobile Menu Dropdown — below navbar */}
+            <div
+                className="md:hidden"
+                style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    background: 'rgba(6,13,30,0.97)',
+                    backdropFilter: 'blur(28px)',
+                    WebkitBackdropFilter: 'blur(28px)',
+                    borderTop: '1px solid rgba(255,255,255,0.06)',
+                    borderBottom: '1px solid rgba(255,255,255,0.04)',
+                    boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+                    overflow: 'hidden',
+                    maxHeight: mobileOpen ? '500px' : '0px',
+                    opacity: mobileOpen ? 1 : 0,
+                    transform: mobileOpen ? 'translateY(0)' : 'translateY(-6px)',
+                    transition: 'max-height 0.45s cubic-bezier(0.23,1,0.32,1), opacity 0.3s ease, transform 0.35s cubic-bezier(0.23,1,0.32,1)',
+                    pointerEvents: mobileOpen ? 'auto' : 'none',
+                    zIndex: 99,
+                }}
+            >
+                {/* Top accent line */}
+                <div style={{ height: '2px', background: 'linear-gradient(90deg, transparent, rgba(200,16,46,0.7), transparent)' }} />
 
-            {/* Mobile Menu */}
-            <div className={`mobile-menu ${mobileOpen ? 'open' : ''} md:hidden fixed top-0 right-0 h-screen w-80 bg-navy-dark/95 backdrop-blur-3xl z-[999] flex flex-col pt-24 px-8 gap-1 shadow-2xl transition-all duration-500`}>
-                <button className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/50 hover:text-white transition-all" onClick={() => setMobileOpen(false)}>
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-                {navLinks.map((link) => (
-                    <button
-                        key={link.id}
-                        onClick={() => scrollTo(link.id)}
-                        className="text-white/80 hover:text-white text-xl font-heading tracking-widest py-5 text-left bg-transparent border-none cursor-pointer border-b border-white/5 transition-all hover:translate-x-2 group"
-                    >
-                        <span className="relative inline-block">
+                <div style={{ padding: '12px 0 20px' }}>
+                    {navLinks.map((link, i) => (
+                        <button
+                            key={link.id}
+                            onClick={() => scrollTo(link.id)}
+                            style={{
+                                width: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '16px',
+                                padding: '16px 28px',
+                                background: 'transparent',
+                                border: 'none',
+                                borderBottom: i < navLinks.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                                color: 'rgba(255,255,255,0.75)',
+                                fontFamily: 'var(--font-heading)',
+                                fontSize: '15px',
+                                letterSpacing: '3px',
+                                textTransform: 'uppercase',
+                                textAlign: 'left',
+                                cursor: 'pointer',
+                                transition: 'color 0.2s ease, padding-left 0.25s ease',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '36px'; }}
+                            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; e.currentTarget.style.paddingLeft = '28px'; }}
+                        >
+                            {/* Crimson dot */}
+                            <span style={{
+                                display: 'inline-block',
+                                width: '5px',
+                                height: '5px',
+                                borderRadius: '50%',
+                                background: '#c8102e',
+                                flexShrink: 0,
+                                boxShadow: '0 0 8px rgba(200,16,46,0.6)',
+                            }} />
                             {t(link.key)}
-                            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-crimson transition-all duration-300 group-hover:w-full" />
-                        </span>
-                    </button>
-                ))}
+                        </button>
+                    ))}
+                </div>
             </div>
         </nav>
     );

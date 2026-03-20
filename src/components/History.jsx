@@ -521,20 +521,32 @@ export default function History() {
                         <div className="container-main flex flex-col items-center justify-center text-center">
                             
                             <div  style={{ marginTop: '8%' }} className="flex flex-col items-center text-center mx-auto w-full max-w-5xl px-4 py-16">
-                                <div className="relative mb-12 mt-20 lg:mt-24">
-                                    <h2 className="text-5xl lg:text-7xl font-heading text-white leading-[1.1] tracking-tight text-center">
+                                <div className="flex flex-col items-center justify-center mb-12 sm:mb-16 mt-20 lg:mt-24">
+                                    <h2 className="text-5xl lg:text-7xl font-heading text-white leading-[1.1] tracking-tight text-center mb-8 lg:mb-12">
                                         {t('outro_title')}
                                     </h2>
-                                    <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-crimson to-transparent"></div>
+                                    {/* Przedziałka z większym odstępem na mobile */}
+                                    <div className="w-24 h-1 bg-gradient-to-r from-transparent via-crimson to-transparent rounded-full opacity-80" />
                                 </div>
 
-                                <div className="space-y-8 text-xl lg:text-3xl font-light leading-relaxed max-w-4xl">
-                                    <p className="text-crimson font-bold text-2xl lg:text-4xl text-center italic" style={{ textShadow: '0 0 30px rgba(230, 51, 41, 0.3)' }}>{t('outro_text_1')}</p>
-                                    <p className="text-white/90 text-lg lg:text-2xl text-center leading-relaxed">{t('outro_text_2')}</p>
+                                <div className="space-y-8 text-xl lg:text-3xl font-light leading-relaxed max-w-4xl px-2">
+                                    <p className="text-crimson font-bold text-2xl sm:text-3xl lg:text-4xl text-center italic" style={{ textShadow: '0 0 30px rgba(230, 51, 41, 0.3)' }}>{t('outro_text_1')}</p>
+                                    <p className="text-white/90 text-lg sm:text-xl lg:text-2xl text-center leading-relaxed">{t('outro_text_2')}</p>
                                 </div>
                             </div>
                             
-                            <div className="mt-32 lg:mt-48 w-full flex justify-center items-center overflow-visible pb-40 lg:pb-56">
+                            {/* Logo z.png dodane na środku z oddechem */}
+                            <div className="mt-8 mb-12 lg:mt-20 lg:mb-16 flex justify-center items-center">
+                                <img 
+                                    src="/images/z.png" 
+                                    alt="Club Logo" 
+                                    loading="lazy" 
+                                    decoding="async" 
+                                    className="w-40 sm:w-56 lg:w-72 h-auto object-contain drop-shadow-[0_10px_40px_rgba(0,0,0,0.6)] hover:scale-105 transition-transform duration-700"
+                                />
+                            </div>
+
+                            <div className="mt-12 lg:mt-20 w-full flex justify-center items-center overflow-visible pb-40 lg:pb-56">
                                 <h1 className='text-[10vw] font-heading leading-[110%] uppercase font-semibold text-center bg-[linear-gradient(135deg,#e63329_0%,#a00d24_100%)] bg-clip-text text-transparent w-full px-2'>
                                     Forza Cagliari
                                 </h1>
