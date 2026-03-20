@@ -335,7 +335,7 @@ export default function History() {
 
                         {/* ══ BOTTOM BAR ══ */}
                         <div className="absolute bottom-0 left-0 md:left-[150px] right-0 h-[60px] border-t border-white/5 flex items-center px-4 md:px-8" style={{ background: 'rgba(0,0,0,0.25)' }}>
-                            <div className="flex items-center gap-2 text-[12px] tracking-[0.12em] text-[#4a5a6a] w-1/3 ml-4">
+                            <div className="flex items-center gap-2 text-[12px] tracking-[0.12em] text-[#4a5a6a] w-1/3 ml-8 sm:ml-12 md:ml-4">
                                 <span className="text-white font-bold text-[14px]">{String(activeSlideInt + 1).padStart(2, '0')}</span>
                                 <span className="mx-[2px]">/</span>
                                 <span className="text-[14px]">{String(N).padStart(2, '0')}</span>
