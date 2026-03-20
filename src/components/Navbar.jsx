@@ -73,6 +73,8 @@ export default function Navbar() {
                                 <img
                                     src={LANGUAGE_LABELS[language]}
                                     alt={language}
+                                    loading="lazy"
+                                    decoding="async"
                                     className="w-full h-full object-cover"
                                 />
                             </div>
@@ -130,6 +132,8 @@ export default function Navbar() {
                                     <img
                                         src={LANGUAGE_LABELS[lang]}
                                         alt={lang}
+                                        loading="lazy"
+                                        decoding="async"
                                         style={{ width: '28px', height: '20px', borderRadius: '4px', objectFit: 'cover', flexShrink: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }}
                                     />
                                     <span>{LANGUAGE_NAMES[lang]}</span>

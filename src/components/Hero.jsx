@@ -58,6 +58,10 @@ export default function Hero() {
 
         frameUrls.forEach((url, i) => {
             const img = new Image();
+            // Hint for high priority for the first few frames
+            if (i < 5) {
+                img.fetchPriority = 'high';
+            }
             img.src = url;
             img.onload = () => {
                 images[i] = img;

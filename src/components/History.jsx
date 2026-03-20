@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import React from 'react';
 import { useTranslation } from '../LanguageContext';
 import { gsap } from 'gsap';
@@ -31,7 +31,7 @@ export default function History() {
         setExpandedEntries(prev => ({...prev, [index]: !prev[index]}));
     };
 
-    const entries = [
+    const entries = useMemo(() => [
         { year: '1920', subtitle: t('timeline_1920_subtitle'), text: t('timeline_1920_text'), img: '/images/hisotria/1920.jpg' },
         { year: '1964', subtitle: t('timeline_1964_subtitle'), text: t('timeline_1964_text'), img: '/images/hisotria/1964.jpg' },
         { year: '1970', subtitle: t('timeline_1970_subtitle'), text: t('timeline_1970_text'), img: '/images/hisotria/1970.jpeg' },
@@ -39,7 +39,8 @@ export default function History() {
         { year: t('timeline_1980s_title'), subtitle: t('timeline_1980s_subtitle'), text: t('timeline_1980s_text'), img: "/images/hisotria/80'.jpg" },
         { year: '1989', subtitle: t('timeline_1989_subtitle'), text: t('timeline_1989_text'), img: '/images/hisotria/1989.webp' },
         { year: '2020', subtitle: t('timeline_2020_subtitle'), text: t('timeline_2020_text'), img: '/images/hisotria/2020.jpeg' },
-    ];
+    ], [t]);
+
     const N = entries.length;
     const N_STOPS = (N - 1) * 4 + 1;
 
@@ -161,7 +162,7 @@ export default function History() {
                     <div style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center', paddingTop: isMobile ? '0px' : '60px', paddingBottom: isMobile ? '0px' : '40px' }}>
                     
                     {/* TITLE & DATE */}
-                    <div style={{ marginBottom: '28px', textAlign: 'center', width: '100%', flexShrink: 0 }}>
+                    <div style={{ marginTop: isMobile ? '40px' : '0px', marginBottom: '28px', textAlign: 'center', width: '100%', flexShrink: 0 }}>
                         <h2 style={{ fontSize: 'clamp(26px, 2.8vw, 38px)', fontWeight: 900, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.15em', lineHeight: 1.2, marginBottom: '10px' }}>
                             {t('history_title')}
                         </h2>
