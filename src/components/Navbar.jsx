@@ -63,6 +63,12 @@ export default function Navbar() {
                                 {t(link.key)}
                             </button>
                         ))}
+                        <a 
+                            href="/cagliari.html" 
+                            className="ml-2 text-crimson hover:text-white text-sm font-bold tracking-wider uppercase transition-all px-4 py-1.5 rounded-full border border-crimson/40 bg-crimson/10 hover:bg-crimson hover:border-crimson hover:shadow-[0_0_15px_rgba(200,16,46,0.5)] hover:scale-105 active:scale-95"
+                        >
+                            Strefa Cagliari
+                        </a>
                     </div>
 
                     {/* Language Switcher (Common for both desktop and mobile now) */}
@@ -200,7 +206,7 @@ export default function Navbar() {
                                 padding: '16px 28px',
                                 background: 'transparent',
                                 border: 'none',
-                                borderBottom: i < navLinks.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                                borderBottom: '1px solid rgba(255,255,255,0.04)',
                                 color: 'rgba(255,255,255,0.75)',
                                 fontFamily: 'var(--font-heading)',
                                 fontSize: '15px',
@@ -213,7 +219,6 @@ export default function Navbar() {
                             onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '36px'; }}
                             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; e.currentTarget.style.paddingLeft = '28px'; }}
                         >
-                            {/* Crimson dot */}
                             <span style={{
                                 display: 'inline-block',
                                 width: '5px',
@@ -226,6 +231,41 @@ export default function Navbar() {
                             {t(link.key)}
                         </button>
                     ))}
+                    
+                    <a
+                        href="/cagliari.html"
+                        style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '16px',
+                            padding: '16px 28px',
+                            background: 'rgba(200,16,46,0.05)',
+                            border: 'none',
+                            color: '#e63329',
+                            fontFamily: 'var(--font-heading)',
+                            fontSize: '15px',
+                            letterSpacing: '3px',
+                            textTransform: 'uppercase',
+                            textAlign: 'left',
+                            textDecoration: 'none',
+                            cursor: 'pointer',
+                            transition: 'color 0.2s ease, padding-left 0.25s ease, background 0.3s ease',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '36px'; e.currentTarget.style.background = 'rgba(200,16,46,0.2)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = '#e63329'; e.currentTarget.style.paddingLeft = '28px'; e.currentTarget.style.background = 'rgba(200,16,46,0.05)'; }}
+                    >
+                        <span style={{
+                            display: 'inline-block',
+                            width: '5px',
+                            height: '5px',
+                            borderRadius: '50%',
+                            background: '#c8102e',
+                            flexShrink: 0,
+                            boxShadow: '0 0 10px rgba(200,16,46,0.9)',
+                        }} />
+                        Strefa Cagliari
+                    </a>
                 </div>
             </div>
         </nav>
