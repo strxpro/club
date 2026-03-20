@@ -10,34 +10,40 @@ import Footer from './components/Footer';
 import CagliariStats from './components/CagliariStats';
 
 function App() {
-  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const [currentPath, setCurrentPath] = useState(window.location.hash);
 
   useEffect(() => {
-    const handleLocationChange = () => {
-      setCurrentPath(window.location.pathname);
-    };
-    
-    window.addEventListener('popstate', handleLocationChange);
-    return () => window.removeEventListener('popstate', handleLocationChange);
+    const onHashChange = () => setCurrentPath(window.location.hash);
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
-  if (currentPath === '/cagliari' || currentPath === '/cagliari/') {
-    return (
-      <LanguageProvider>
-         <CagliariStats />
-      </LanguageProvider>
-    );
-  }
+  const isCagliari = currentPath === '#cagliari';
 
+  // Smooth scroll routing adjustment for hashtag anchor links on main page
+  useEffect(() => {
+     if (!isCagliari && currentPath && currentPath !== '#') {
+         setTimeout(() => {
+             const id = currentPath.substring(1);
+             document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+         }, 100);
+     }
+  }, [currentPath, isCagliari]);
   return (
     <LanguageProvider>
       <div className="min-h-screen">
-        <Navbar />
-        <Hero />
-        <GigiRivaMemorial />
-        <History />
-        <Gallery />
-        <Contact />
+        <Navbar currentPath={currentPath} />
+        {isCagliari ? (
+          <CagliariStats />
+        ) : (
+          <>
+            <Hero />
+            <GigiRivaMemorial />
+            <History />
+            <Gallery />
+            <Contact />
+          </>
+        )}
         <Footer />
       </div>
     </LanguageProvider>
