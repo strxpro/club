@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { LanguageProvider, useTranslation } from './LanguageContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import './index.css';
 
 const CagliariNav = () => (
     <LanguageProvider>

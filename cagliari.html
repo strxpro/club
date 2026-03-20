@@ -4,26 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cagliari Calcio - Strefa Kibica</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        navy: '#0b132b',
-                        'navy-light': '#14224a',
-                        'navy-dark': '#060d1e',
-                        crimson: '#c8102e',
-                    },
-                    fontFamily: {
-                        heading: ['"Bebas Neue"', 'sans-serif'],
-                        body: ['"Inter"', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -122,10 +103,10 @@
     <!-- REACT NAVBAR MOUNT -->
     <div id="cagliari-navbar-root"></div>
 
-    <main class="container-main mt-32 sm:mt-40 space-y-10">
+    <main class="container-main mt-32 xl:mt-40 space-y-10 relative z-10">
         
         <!-- HEADER -->
-        <header class="text-center space-y-4 mb-16 flex flex-col items-center">
+        <header class="text-center space-y-4 mb-4 flex flex-col items-center">
             <div class="relative inline-block w-48 mb-3">
                 <select id="global-season-selector" class="w-full appearance-none px-6 py-2 rounded-full border border-white/10 bg-white/5 text-[11px] font-bold tracking-[0.2em] text-white/60 cursor-pointer outline-none hover:bg-white/10 hover:text-white transition-colors text-center uppercase">
                     <option value="2023" class="bg-navy-dark text-white/80">SEZON 2023 / 24</option>
