@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cagliari Calcio - Strefa Kibica</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#0b132b',
+                        'navy-light': '#14224a',
+                        'navy-dark': '#060d1e',
+                        crimson: '#c8102e',
+                    },
+                    fontFamily: {
+                        heading: ['"Bebas Neue"', 'sans-serif'],
+                        body: ['"Inter"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #060d1e;
+            color: rgba(255, 255, 255, 0.85);
+            -webkit-font-smoothing: antialiased;
+        }
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Bebas Neue', sans-serif;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+        }
+        .live-pulse {
+            animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(200, 16, 46, 1); box-shadow: 0 0 15px rgba(200, 16, 46, 0.5); }
+            50% { border-color: rgba(200, 16, 46, 0.4); box-shadow: 0 0 5px rgba(200, 16, 46, 0.1); }
+        }
+        
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #c8102e;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .cagliari-row {
+            background: rgba(200, 16, 46, 0.15) !important;
+            border-left: 4px solid #c8102e;
+        }
+    </style>
+</head>
+<body class="bg-navy-dark min-h-screen pb-24 relative overflow-x-hidden">
+
+    <!-- Subtle bg gradients matching main site -->
+    <div class="fixed inset-0 pointer-events-none z-[-1]" style="background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(20, 34, 74, 0.5) 0%, transparent 50%), radial-gradient(ellipse 70% 50% at 20% 70%, rgba(20, 34, 74, 0.3) 0%, transparent 50%);"></div>
+
+    <!-- NAVBAR -->
+    <nav class="w-full bg-navy-dark/90 backdrop-blur-lg border-b border-white/5 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <img src="/images/t.png" alt="Logo" class="h-10 opacity-100 drop-shadow-lg" onerror="this.src='https://media.api-sports.io/football/teams/490.png'">
+                <h1 class="text-2xl font-heading text-white tracking-widest mt-1 hidden sm:block">Strefa Cagliari</h1>
+            </div>
+            <a href="/" class="text-sm font-semibold text-white/70 hover:text-white transition-colors border border-white/20 rounded-full px-5 py-2 hover:bg-white/10 flex items-center gap-2">
+                &larr; <span class="hidden sm:inline">Wróć do strony</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- LIVE MATCH BANNER (Hidden by default) -->
+    <div id="live-banner" class="hidden w-full bg-crimson/20 border-b border-crimson live-pulse py-4 z-40 sticky top-20 backdrop-blur-md shadow-xl">
+        <!-- Content injected via JS -->
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 space-y-16">
+        
+        <!-- HEADER -->
+        <header class="text-center space-y-4">
+            <span class="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-bold tracking-[0.2em] text-white/50 mb-3">SEZON 2024 / 2025</span>
+            <h2 class="text-5xl md:text-7xl font-heading text-white tracking-widest uppercase">
+                Aktualne <span class="text-crimson">Statystyki</span>
+            </h2>
+            <p class="text-white/60 text-lg max-w-2xl mx-auto font-light">Najświeższe dane sportowe, terminarz i skład Cagliari Calcio napędzane przez oficjalne API-Football.</p>
+        </header>
+
+        <!-- GRID SYSTEM -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- STANDINGS TABLE -->
+            <section class="lg:col-span-2 glass-card p-6 md:p-8 flex flex-col relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-crimson/5 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+                <div class="flex items-center justify-between mb-8 pb-3 border-b border-white/10">
+                    <h3 class="text-3xl font-heading text-white tracking-wide">Tabela Serie A</h3>
+                    <div id="standings-loader" class="loader"></div>
+                </div>
+                <div class="overflow-x-auto pb-4">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="text-xs uppercase tracking-wider text-white/40 border-b border-white/5">
+                            <tr>
+                                <th class="py-3 px-3 font-semibold">Poz</th>
+                                <th class="py-3 px-3 font-semibold">Klub</th>
+                                <th class="py-3 px-2 font-semibold text-center">M</th>
+                                <th class="py-3 px-2 font-semibold text-center">Z-R-P</th>
+                                <th class="py-3 px-2 font-semibold text-center">Gole</th>
+                                <th class="py-3 px-2 font-bold text-center text-crimson text-[13px]">Pkt</th>
+                            </tr>
+                        </thead>
+                        <tbody id="standings-body" class="divide-y divide-white/5 text-white/80">
+                            <!-- Injected rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- FIXTURES -->
+            <section class="glass-card p-6 md:p-8 flex flex-col gap-10">
+                <!-- Last Matches -->
+                <div>
+                    <div class="flex items-center justify-between mb-5 border-b border-white/10 pb-3">
+                        <h3 class="text-2xl font-heading text-white tracking-wide">Ostatnie Mecze</h3>
+                        <div id="fixtures-loader-1" class="loader scale-75"></div>
+                    </div>
+                    <div id="last-matches" class="flex flex-col gap-3"></div>
+                </div>
+
+                <!-- Upcoming Matches -->
+                <div>
+                    <div class="flex items-center justify-between mb-5 border-b border-white/10 pb-3">
+                        <h3 class="text-2xl font-heading text-white tracking-wide">Nadchodzące</h3>
+                        <div id="fixtures-loader-2" class="loader scale-75 hidden"></div>
+                    </div>
+                    <div id="upcoming-matches" class="flex flex-col gap-3"></div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- SQUAD SECTION -->
+        <section class="glass-card p-6 md:p-8 mt-12 mb-20 relative overflow-hidden">
+            <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-navy-light/40 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+            
+            <div class="flex items-center justify-between mb-10 border-b border-white/10 pb-4">
+                <h3 class="text-4xl font-heading text-white tracking-wider">Kadra Zespołu</h3>
+                <div id="squad-loader" class="loader"></div>
+            </div>
+            
+            <div id="squad-container" class="space-y-16">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JS LOGIC -->
+    <script>
+        // CONFIGURATION
+        const API_KEY = 'cef830252713a75968dd501948b06464';
+        const BASE_URL = 'https://v3.football.api-sports.io';
+        const LEAGUE_ID = 135; // Serie A
+        const TEAM_ID = 490;   // Cagliari
+        // Dla rozgrywek na przełomie roku, API oczekuje roku początku sezonu. 
+        // 2024 to sezon 24/25, który normalnie nazywa się sezonem 2025.
+        const SEASON = 2024;   
+        
+        const CACHE_TTL = 3 * 60 * 60 * 1000; // 3 godziny buforowania
+        
+        const headers = {
+            "x-apisports-key": API_KEY
+        };
+
+        // Cache fetch wrapper (zapobiega blokadzie konta - 100 requests / day)
+        async function fetchWithCache(endpoint) {
+            const cacheKey = `cagliari_cache_${endpoint}`;
+            const cached = localStorage.getItem(cacheKey);
+            
+            if (cached) {
+                try {
+                    const { timestamp, data } = JSON.parse(cached);
+                    // Sprawdzamy, czy cache nadal jest ważny
+                    if (Date.now() - timestamp < CACHE_TTL) {
+                        return data;
+                    }
+                } catch(e) {
+                    console.error("Cache parsing error", e);
+                }
+            }
+            
+            try {
+                console.log("Fetching fresh data from API for:", endpoint);
+                const response = await fetch(`${BASE_URL}${endpoint}`, { method: 'GET', headers });
+                const data = await response.json();
+                
+                // Walidacja czy API nie wypluło błędu (np. wyczerpany limit)
+                if (data.errors && Object.keys(data.errors).length > 0) {
+                    throw new Error("API Error: " + JSON.stringify(data.errors));
+                }
+                
+                if (data.response) {
+                    // Zapisujemy nowy wynik do pamięci przeglądarki
+                    localStorage.setItem(cacheKey, JSON.stringify({
+                        timestamp: Date.now(),
+                        data: data.response
+                    }));
+                    return data.response;
+                }
+                
+                throw new Error("Invalid API Response Structure");
+            } catch (error) {
+                console.error("Fetch error:", error);
+                
+                // W razie błędu awaryjnie wyciągamy przeterminowany cache (jeśli istnieje)
+                if (cached) {
+                    console.warn(`Awaryjne użycie wygasłego cache dla ${endpoint}`);
+                    return JSON.parse(cached).data;
+                }
+                return null;
+            }
+        }
+
+        // 1. STANDINGS (Tabela Serie A)
+        async function loadStandings() {
+            const data = await fetchWithCache(`/standings?season=${SEASON}&league=${LEAGUE_ID}`);
+            const tbody = document.getElementById('standings-body');
+            document.getElementById('standings-loader').style.display = 'none';
+
+            if (!data || !data[0] || !data[0].league.standings[0]) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-white/40">Brak danych z API. Być może przekroczono dzienny limit (100 zapytań).</td></tr>';
+                return;
+            }
+
+            const standings = data[0].league.standings[0];
+            let html = '';
+            
+            standings.forEach(row => {
+                const isCagliari = row.team.id === TEAM_ID;
+                const rowClass = isCagliari ? 'cagliari-row' : 'hover:bg-white/5 transition-colors border-l-4 border-transparent';
+                
+                html += `
+                    <tr class="${rowClass}">
+                        <td class="py-3 px-3 text-white/70 ${isCagliari ? 'font-bold !text-white' : ''}">${row.rank}</td>
+                        <td class="py-3 px-3 flex items-center gap-3">
+                            <img src="${row.team.logo}" alt="${row.team.name}" class="w-6 h-6 object-contain">
+                            <span class="${isCagliari ? 'font-bold text-white' : 'font-medium'}">${row.team.name}</span>
+                        </td>
+                        <td class="py-3 px-2 text-center text-white/50">${row.all.played}</td>
+                        <td class="py-3 px-2 text-center text-white/60">${row.all.win}-${row.all.draw}-${row.all.lose}</td>
+                        <td class="py-3 px-2 text-center text-white/50 tracking-wider">${row.all.goals.for}:${row.all.goals.against}</td>
+                        <td class="py-3 px-2 text-center font-bold ${isCagliari ? 'text-white' : 'text-crimson'} text-[15px]">${row.points}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // 2. FIXTURES (Recent, Upcoming, Live)
+        async function loadFixtures() {
+            const data = await fetchWithCache(`/fixtures?team=${TEAM_ID}&season=${SEASON}`);
+            document.getElementById('fixtures-loader-1').style.display = 'none';
+            if(document.getElementById('fixtures-loader-2')) document.getElementById('fixtures-loader-2').style.display = 'none';
+
+            if (!data) return;
+
+            // Kody statusów meczu w v3 API
+            const liveStatuses = ['1H', '2H', 'HT', 'ET', 'BT', 'P', 'SUSP', 'INT', 'LIVE'];
+            const finishedStatuses = ['FT', 'AET', 'PEN'];
+            const notStartedStatuses = ['TBD', 'NS'];
+
+            // Ostatnie rozegrane mecze -> filtrujemy po statusie, odwracamy kolejność i bierzemy 5
+            const lastMatches = data.filter(f => finishedStatuses.includes(f.fixture.status.short)).sort((a,b) => b.fixture.timestamp - a.fixture.timestamp).slice(0, 5);
+            // Nadchodzące mecze
+            const upcomingMatches = data.filter(f => notStartedStatuses.includes(f.fixture.status.short)).sort((a,b) => a.fixture.timestamp - b.fixture.timestamp).slice(0, 5);
+            // Mecze aktualnie trwające
+            const liveMatches = data.filter(f => liveStatuses.includes(f.fixture.status.short));
+
+            // Wypełnij ostatnie mecze
+            const lastContainer = document.getElementById('last-matches');
+            if (lastMatches.length > 0) {
+                lastContainer.innerHTML = lastMatches.map(f => createMatchCard(f, true)).join('');
+            } else {
+                lastContainer.innerHTML = '<p class="text-white/40 text-sm text-center py-4">Brak rozegranych meczów w tym sezonie.</p>';
+            }
+
+            // Wypełnij nadchodzące
+            const upContainer = document.getElementById('upcoming-matches');
+            if (upcomingMatches.length > 0) {
+                upContainer.innerHTML = upcomingMatches.map(f => createMatchCard(f, false)).join('');
+            } else {
+                upContainer.innerHTML = '<p class="text-white/40 text-sm text-center py-4">Brak zaplanowanych meczów w kalendarzu.</p>';
+            }
+
+            // Obsługa banera NA ŻYWO
+            if (liveMatches.length > 0) {
+                const live = liveMatches[0];
+                const banner = document.getElementById('live-banner');
+                banner.classList.remove('hidden');
+                banner.innerHTML = `
+                    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 py-2">
+                        <div class="flex items-center gap-4 hidden md:flex">
+                            <span class="bg-crimson text-white text-xs font-bold px-3 py-1 rounded animate-pulse shadow-[0_0_10px_rgba(200,16,46,0.8)]">NA ŻYWO</span>
+                            <span class="text-white font-medium text-sm border border-white/20 px-2 py-0.5 rounded">${live.fixture.status.elapsed}' min</span>
+                        </div>
+                        
+                        <div class="flex items-center justify-center gap-6 font-heading text-2xl md:text-3xl text-white w-full md:w-auto">
+                            <div class="flex items-center gap-3 flex-1 justify-end">
+                                <span class="hidden sm:inline tracking-wide font-normal">${live.teams.home.name}</span>
+                                <span class="inline sm:hidden tracking-wide font-normal truncate max-w-[80px]">${live.teams.home.name.substring(0,3).toUpperCase()}</span>
+                                <img src="${live.teams.home.logo}" class="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-md">
+                            </div>
+                            
+                            <span class="text-4xl md:text-5xl text-crimson font-bold drop-shadow-[0_0_15px_rgba(200,16,46,0.6)] px-2">${live.goals.home ?? 0} : ${live.goals.away ?? 0}</span>
+                            
+                            <div class="flex items-center gap-3 flex-1 justify-start">
+                                <img src="${live.teams.away.logo}" class="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-md">
+                                <span class="hidden sm:inline tracking-wide font-normal">${live.teams.away.name}</span>
+                                <span class="inline sm:hidden tracking-wide font-normal truncate max-w-[80px]">${live.teams.away.name.substring(0,3).toUpperCase()}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-4 flex md:hidden w-full justify-between">
+                            <span class="text-white/60 text-xs">${live.league.name}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-crimson font-bold text-[10px] animate-pulse">● LIVE</span>
+                                <span class="text-white text-xs">${live.fixture.status.elapsed}'</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function createMatchCard(f, isFinished) {
+            const matchDate = new Date(f.fixture.date);
+            const dateStr = matchDate.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' });
+            const timeStr = matchDate.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+            
+            return `
+                <div class="flex items-center justify-between bg-black/20 p-4 rounded-xl border border-white/5 hover:bg-white/5 hover:border-white/20 transition-all group">
+                    <div class="flex flex-col items-center w-[35%] py-1">
+                        <img src="${f.teams.home.logo}" class="w-8 h-8 sm:w-10 sm:h-10 mb-2 object-contain group-hover:scale-110 transition-transform" alt="${f.teams.home.name}">
+                        <span class="text-[11px] sm:text-xs text-white/50 font-bold uppercase tracking-wider text-center w-full truncate px-1" title="${f.teams.home.name}">
+                            ${f.teams.home.name.substring(0,3)}
+                        </span>
+                    </div>
+                    
+                    <div class="flex flex-col items-center justify-center w-[30%]">
+                        ${isFinished 
+                            ? `<span class="font-heading text-2xl sm:text-3xl text-white font-bold tracking-widest">${f.goals.home} - ${f.goals.away}</span>
+                               <span class="text-[9px] text-white/30 uppercase mt-1">Wynik końcowy</span>` 
+                            : `<span class="text-xs sm:text-sm text-crimson font-bold tracking-wider">${dateStr}</span>
+                               <span class="text-[10px] sm:text-xs text-white/40 mt-1">${timeStr}</span>`
+                        }
+                    </div>
+                    
+                    <div class="flex flex-col items-center w-[35%] py-1">
+                        <img src="${f.teams.away.logo}" class="w-8 h-8 sm:w-10 sm:h-10 mb-2 object-contain group-hover:scale-110 transition-transform" alt="${f.teams.away.name}">
+                        <span class="text-[11px] sm:text-xs text-white/50 font-bold uppercase tracking-wider text-center w-full truncate px-1" title="${f.teams.away.name}">
+                            ${f.teams.away.name.substring(0,3)}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 3. SQUAD
+        async function loadSquad() {
+            const data = await fetchWithCache(`/players/squad?team=${TEAM_ID}`);
+            const loader = document.getElementById('squad-loader');
+            const container = document.getElementById('squad-container');
+            
+            loader.style.display = 'none';
+
+            if (!data || !data[0] || !data[0].players) {
+                container.innerHTML = '<p class="text-white/40 text-center py-8">Nie udało się pobrać aktualnej kadry zespołu.</p>';
+                return;
+            }
+
+            const players = data[0].players;
+            
+            // Grupowanie graczy po ich pozycjach na boisku
+            const grouped = {
+                "Goalkeepers": { name: "Bramkarze", players: [] },
+                "Defenders": { name: "Obrońcy", players: [] },
+                "Midfielders": { name: "Pomocnicy", players: [] },
+                "Attackers": { name: "Napastnicy", players: [] }
+            };
+
+            players.forEach(p => {
+                let pos = p.position;
+                if(pos === 'Attacker') pos = 'Attackers';
+                if(pos === 'Midfielder') pos = 'Midfielders';
+                if(pos === 'Defender') pos = 'Defenders';
+                if(pos === 'Goalkeeper') pos = 'Goalkeepers';
+
+                if (grouped[pos]) {
+                    // Dodajemy defaultowy avatarek (jesli brak foto)
+                    if(!p.photo || p.photo.includes('not-found')) {
+                        p.photo = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.name) + '&background=0d1530&color=ffffff&size=200';
+                    }
+                    grouped[pos].players.push(p);
+                }
+            });
+
+            let html = '';
+            for (const [key, category] of Object.entries(grouped)) {
+                if (category.players.length === 0) continue;
+                
+                // Sort by number (if exists)
+                category.players.sort((a,b) => (a.number || 99) - (b.number || 99));
+                
+                html += `
+                    <div>
+                        <div class="flex items-center gap-4 mb-6">
+                            <h4 class="text-2xl lg:text-3xl font-heading tracking-widest text-white uppercase">${category.name}</h4>
+                            <div class="h-px bg-white/10 flex-1"></div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5">
+                            ${category.players.map(p => `
+                                <div class="bg-black/20 rounded-xl overflow-hidden border border-white/5 hover:border-crimson/60 hover:shadow-[0_10px_30px_rgba(200,16,46,0.15)] transition-all duration-300 group flex flex-col">
+                                    <div class="relative bg-navy-light/30 pt-4 flex justify-center aspect-[5/6] overflow-hidden">
+                                        <img src="${p.photo}" alt="${p.name}" loading="lazy" class="h-[90%] w-auto mt-auto object-bottom object-contain group-hover:scale-105 transition-transform duration-500 z-10">
+                                        
+                                        <!-- Gradient tła dla lepszego wydobycia postaci -->
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-20"></div>
+                                        
+                                        <!-- Wielki pół-przezroczysty numer w tle -->
+                                        ${p.number ? `<span class="absolute -right-2 -bottom-4 text-white/[0.03] font-heading font-black" style="font-size: 8rem; line-height: 1;">${p.number}</span>` : ''}
+                                        
+                                        <!-- Zwykły numer na koszulce -->
+                                        ${p.number ? `
+                                            <div class="absolute top-3 right-3 z-30 w-8 h-8 rounded-full bg-crimson shadow-lg flex items-center justify-center border border-white/20">
+                                                <span class="text-white font-heading text-lg leading-none mt-0.5">${p.number}</span>
+                                            </div>
+                                        ` : ''}
+                                        
+                                        <!-- Wiek (drobny akcent na dole) -->
+                                        ${p.age ? `
+                                            <div class="absolute bottom-2 left-2 z-30 flex items-center gap-1.5 opacity-0 -translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all">
+                                                <span class="text-[9px] uppercase tracking-widest text-white/50 bg-black/50 px-1.5 py-0.5 rounded">Wiek: ${p.age}</span>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                    <div class="p-3 text-center bg-navy flex-1 flex flex-col justify-center border-t border-white/5">
+                                        <h5 class="text-sm border-white/0 font-semibold text-white/90 leading-snug" title="${p.name}">${p.name}</h5>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // Inicjalizacja skryptu przy starcie strony
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStandings();
+            loadFixtures();
+            loadSquad();
+        });
+    </script>
+</body>
+</html>
