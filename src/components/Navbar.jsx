@@ -75,7 +75,7 @@ export default function Navbar() {
                         ))}
                         <a 
                             href="/cagliari.html" 
-                            className="ml-2 text-white hover:text-white text-base font-bold tracking-wider uppercase transition-all px-4 py-1.5 rounded-full border border-white/30 bg-transparent hover:border-white hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95"
+                            className="ml-2 text-white hover:text-white text-base font-bold tracking-wider uppercase transition-all px-6 py-2.5 rounded-full border border-white/30 bg-transparent hover:border-white hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95"
                         >
                             {t('nav_strefa_cagliari')}
                         </a>
