@@ -24,7 +24,14 @@ const LANGUAGE_NAMES = {
 };
 
 export function LanguageProvider({ children }) {
-    const [language, setLanguage] = useState('it');
+    const [language, setLanguageState] = useState(() => {
+        return localStorage.getItem('appLang') || 'it';
+    });
+
+    const setLanguage = useCallback((lang) => {
+        setLanguageState(lang);
+        localStorage.setItem('appLang', lang);
+    }, []);
 
     const t = useCallback((key) => {
         const entry = translations[key];

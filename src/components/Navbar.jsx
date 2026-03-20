@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../LanguageContext';
 
-export default function Navbar({ isCagliariPage }) {
+export default function Navbar() {
     const { t, language, setLanguage, LANGUAGES, LANGUAGE_LABELS, LANGUAGE_NAMES } = useTranslation();
     const [scrolled, setScrolled] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -24,16 +24,13 @@ export default function Navbar({ isCagliariPage }) {
     }, [langOpen]);
 
     const scrollTo = (id) => {
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-        setMobileOpen(false);
-    };
-
-    const handleNavItemClick = (id) => {
-        if (isCagliariPage) {
-            window.location.href = `./index.html#${id}`;
+        const el = document.getElementById(id);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
         } else {
-            scrollTo(id);
+            window.location.href = '/#' + id;
         }
+        setMobileOpen(false);
     };
 
     const navLinks = [
@@ -45,19 +42,17 @@ export default function Navbar({ isCagliariPage }) {
 
     return (
         <nav
-            className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled || isCagliariPage ? 'nav-glass' : 'bg-transparent'}`}
-            style={scrolled || isCagliariPage ? { boxShadow: '0 4px 30px rgba(255,255,255,0.04), 0 1px 0 rgba(255,255,255,0.06)' } : {}}
+            className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled ? 'nav-glass' : 'bg-transparent'}`}
+            style={scrolled ? { boxShadow: '0 4px 30px rgba(255,255,255,0.04), 0 1px 0 rgba(255,255,255,0.06)' } : {}}
         >
             <div className="container-main flex items-center justify-between h-20 md:h-24 transition-all duration-300">
                 {/* Logo */}
                 <a
-                    href="#"
+                    href="/"
                     className="flex items-center py-1 no-underline shrink-0"
                     onClick={(e) => { 
-                        e.preventDefault(); 
-                        if (isCagliariPage) {
-                            window.location.href = './index.html';
-                        } else {
+                        if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+                            e.preventDefault(); 
                             window.scrollTo({ top: 0, behavior: 'smooth' }); 
                         }
                     }}
@@ -72,27 +67,18 @@ export default function Navbar({ isCagliariPage }) {
                         {navLinks.map((link) => (
                             <button
                                 key={link.id}
-                                onClick={() => handleNavItemClick(link.id)}
+                                onClick={() => scrollTo(link.id)}
                                 className="text-white/75 hover:text-white text-base font-bold tracking-wider transition-all bg-transparent border-none cursor-pointer px-2 py-1 hover:scale-110 active:scale-95"
                             >
                                 {t(link.key)}
                             </button>
                         ))}
-                        {isCagliariPage ? (
-                            <a 
-                                href="./index.html" 
-                                className="ml-2 text-crimson hover:text-white text-sm font-bold tracking-wider uppercase transition-all px-4 py-1.5 rounded-full border border-crimson/40 bg-crimson/10 hover:bg-crimson hover:border-crimson hover:shadow-[0_0_15px_rgba(200,16,46,0.5)] hover:scale-105 active:scale-95 flex items-center gap-2"
-                            >
-                                &larr; {t('cagliari_back')}
-                            </a>
-                        ) : (
-                            <a 
-                                href="./cagliari.html" 
-                                className="ml-2 text-crimson hover:text-white text-sm font-bold tracking-wider uppercase transition-all px-4 py-1.5 rounded-full border border-crimson/40 bg-crimson/10 hover:bg-crimson hover:border-crimson hover:shadow-[0_0_15px_rgba(200,16,46,0.5)] hover:scale-105 active:scale-95"
-                            >
-                                Strefa Cagliari
-                            </a>
-                        )}
+                        <a 
+                            href="/cagliari.html" 
+                            className="ml-2 text-white hover:text-white text-base font-bold tracking-wider uppercase transition-all px-4 py-1.5 rounded-full border border-white/30 bg-transparent hover:border-white hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95"
+                        >
+                            {t('nav_strefa_cagliari')}
+                        </a>
                     </div>
 
                     {/* Language Switcher (Common for both desktop and mobile now) */}
@@ -221,7 +207,7 @@ export default function Navbar({ isCagliariPage }) {
                     {navLinks.map((link, i) => (
                         <button
                             key={link.id}
-                            onClick={() => handleNavItemClick(link.id)}
+                            onClick={() => scrollTo(link.id)}
                             style={{
                                 width: '100%',
                                 display: 'flex',
@@ -256,77 +242,40 @@ export default function Navbar({ isCagliariPage }) {
                         </button>
                     ))}
                     
-                    {isCagliariPage ? (
-                        <a
-                            href="./index.html"
-                            style={{
-                                width: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '16px',
-                                padding: '16px 28px',
-                                background: 'rgba(200,16,46,0.05)',
-                                border: 'none',
-                                color: '#e63329',
-                                fontFamily: 'var(--font-heading)',
-                                fontSize: '15px',
-                                letterSpacing: '3px',
-                                textTransform: 'uppercase',
-                                textAlign: 'left',
-                                textDecoration: 'none',
-                                cursor: 'pointer',
-                                transition: 'color 0.2s ease, padding-left 0.25s ease, background 0.3s ease',
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '36px'; e.currentTarget.style.background = 'rgba(200,16,46,0.2)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.color = '#e63329'; e.currentTarget.style.paddingLeft = '28px'; e.currentTarget.style.background = 'rgba(200,16,46,0.05)'; }}
-                        >
-                            <span style={{
-                                display: 'inline-block',
-                                width: '5px',
-                                height: '5px',
-                                borderRadius: '50%',
-                                background: '#c8102e',
-                                flexShrink: 0,
-                                boxShadow: '0 0 10px rgba(200,16,46,0.9)',
-                            }} />
-                            &larr; {t('cagliari_back')}
-                        </a>
-                    ) : (
-                        <a
-                            href="./cagliari.html"
-                            style={{
-                                width: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '16px',
-                                padding: '16px 28px',
-                                background: 'rgba(200,16,46,0.05)',
-                                border: 'none',
-                                color: '#e63329',
-                                fontFamily: 'var(--font-heading)',
-                                fontSize: '15px',
-                                letterSpacing: '3px',
-                                textTransform: 'uppercase',
-                                textAlign: 'left',
-                                textDecoration: 'none',
-                                cursor: 'pointer',
-                                transition: 'color 0.2s ease, padding-left 0.25s ease, background 0.3s ease',
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '36px'; e.currentTarget.style.background = 'rgba(200,16,46,0.2)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.color = '#e63329'; e.currentTarget.style.paddingLeft = '28px'; e.currentTarget.style.background = 'rgba(200,16,46,0.05)'; }}
-                        >
-                            <span style={{
-                                display: 'inline-block',
-                                width: '5px',
-                                height: '5px',
-                                borderRadius: '50%',
-                                background: '#c8102e',
-                                flexShrink: 0,
-                                boxShadow: '0 0 10px rgba(200,16,46,0.9)',
-                            }} />
-                            Strefa Cagliari
-                        </a>
-                    )}
+                    <a
+                        href="/cagliari.html"
+                        style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '16px',
+                            padding: '16px 28px',
+                            background: 'rgba(200,16,46,0.05)',
+                            border: 'none',
+                            color: '#e63329',
+                            fontFamily: 'var(--font-heading)',
+                            fontSize: '15px',
+                            letterSpacing: '3px',
+                            textTransform: 'uppercase',
+                            textAlign: 'left',
+                            textDecoration: 'none',
+                            cursor: 'pointer',
+                            transition: 'color 0.2s ease, padding-left 0.25s ease, background 0.3s ease',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '36px'; e.currentTarget.style.background = 'rgba(200,16,46,0.2)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = '#e63329'; e.currentTarget.style.paddingLeft = '28px'; e.currentTarget.style.background = 'rgba(200,16,46,0.05)'; }}
+                    >
+                        <span style={{
+                            display: 'inline-block',
+                            width: '5px',
+                            height: '5px',
+                            borderRadius: '50%',
+                            background: '#c8102e',
+                            flexShrink: 0,
+                            boxShadow: '0 0 10px rgba(200,16,46,0.9)',
+                        }} />
+                        {t('nav_strefa_cagliari')}
+                    </a>
                 </div>
             </div>
         </nav>
