@@ -142,6 +142,8 @@ export default function GigiRivaMemorial() {
                                         ref={imageRef}
                                         src="/images/licensed-image.jpg"
                                         alt="Gigi Riva Portrait"
+                                        loading="lazy"
+                                        decoding="async"
                                         className="absolute inset-0 w-full h-full object-cover object-top"
                                     />
 

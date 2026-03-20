@@ -17,6 +17,16 @@ export default function History() {
     const [isSnapping, setIsSnapping] = useState(false);
     const [expandedEntries, setExpandedEntries] = useState({});
 
+    const [isMobile, setIsMobile] = useState(false);
+    const [touchStartX, setTouchStartX] = useState(0);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+        checkMobile();
+        window.addEventListener('resize', checkMobile, { passive: true });
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     const toggleReadMore = (index) => {
         setExpandedEntries(prev => ({...prev, [index]: !prev[index]}));
     };
@@ -36,6 +46,7 @@ export default function History() {
     useEffect(() => {
         let scrollTimeout;
         const handleScroll = () => {
+            if (isMobile) return; // Disable scroll-lock driven navigation on mobile
             if (!anchorRef.current) return;
             const rect = anchorRef.current.getBoundingClientRect();
             if (rect.top <= 0 && rect.bottom >= window.innerHeight) {
@@ -65,12 +76,16 @@ export default function History() {
             window.removeEventListener('scroll', handleScroll);
             clearTimeout(scrollTimeout);
         };
-    }, [N_STOPS]);
+    }, [N_STOPS, isMobile]);
 
     const activeSlideInt = Math.floor(activeStop / 4);
     const activeSlideFloat = activeStop / 4;
 
     const navigateToStop = useCallback((stopIdx) => {
+        if (isMobile) {
+            setActiveStop(stopIdx); // Direct slide switch on mobile, no native scroll required
+            return;
+        }
         if (!anchorRef.current) return;
         const rect = anchorRef.current.getBoundingClientRect();
         const scrollableDistance = rect.height - window.innerHeight;
@@ -83,7 +98,7 @@ export default function History() {
             behavior: 'smooth'
         });
         setTimeout(() => setIsSnapping(false), 600);
-    }, [N_STOPS]);
+    }, [N_STOPS, isMobile]);
 
     const handleNextSlide = useCallback(() => {
         const currentMain = Math.round(activeStop / 4);
@@ -95,6 +110,20 @@ export default function History() {
         const prevMain = Math.ceil(activeStop / 4) * 4 - 4;
         if (prevMain >= 0) navigateToStop(prevMain);
     }, [activeStop, navigateToStop]);
+
+    // Touch Swipe logic for mobile
+    const handleTouchStart = (e) => {
+        if (!isMobile) return;
+        setTouchStartX(e.changedTouches[0].screenX);
+    };
+
+    const handleTouchEnd = (e) => {
+        if (!isMobile) return;
+        const touchEndX = e.changedTouches[0].screenX;
+        const diffX = touchStartX - touchEndX;
+        if (diffX > 50) handleNextSlide();
+        else if (diffX < -50) handlePrevSlide();
+    };
 
     useEffect(() => {
         const ctx = gsap.context(() => {
@@ -125,11 +154,11 @@ export default function History() {
 
     return (
         <React.Fragment>
-            <section ref={anchorRef} id="storia" className="relative w-full h-[480vh] bg-navy-dark mt-16 md:mt-20" style={{ fontFamily: "'Inter', sans-serif", zIndex: 10 }}>
+            <section ref={anchorRef} id="storia" className={`relative w-full ${isMobile ? 'h-auto py-12 md:py-20' : 'h-[480vh]'} bg-navy-dark mt-16 md:mt-20`} style={{ fontFamily: "'Inter', sans-serif", zIndex: 10 }}>
                 <div 
-                    className="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden"
+                    className={`${isMobile ? 'relative w-full' : 'sticky top-0 h-screen w-full'} flex flex-col items-center justify-center overflow-hidden`}
                 >
-                    <div style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', padding: '0 32px', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center', paddingTop: '60px', paddingBottom: '40px' }}>
+                    <div style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center', paddingTop: isMobile ? '0px' : '60px', paddingBottom: isMobile ? '0px' : '40px' }}>
                     
                     {/* TITLE & DATE */}
                     <div style={{ marginBottom: '28px', textAlign: 'center', width: '100%', flexShrink: 0 }}>
@@ -150,7 +179,7 @@ export default function History() {
                         boxShadow: '0 40px 100px rgba(0,0,0,0.8)',
                         position: 'relative',
                         userSelect: 'none',
-                        minHeight: 0
+                        minHeight: isMobile ? '75vh' : 0
                     }}>
                         {/* ══ LEFT RULER PANEL ══ */}
                         <div className="hidden md:flex" style={{
@@ -227,7 +256,10 @@ export default function History() {
                         </div>
 
                         {/* ══ RIGHT PEEKING CAROUSEL ══ */}
-                        <div style={{
+                        <div 
+                            onTouchStart={handleTouchStart}
+                            onTouchEnd={handleTouchEnd}
+                            style={{
                             flex: 1,
                             display: 'flex',
                             flexDirection: 'column',
@@ -265,11 +297,11 @@ export default function History() {
                                                     pointerEvents: isActive ? 'auto' : 'none',
                                                 }}
                                             >
-                                                <div className="flex flex-col md:flex-row w-full gap-4 md:gap-[4%] max-h-[100dvh] md:max-h-none overflow-y-auto md:overflow-visible pb-20 md:pb-0" style={{ width: '100%', alignItems: 'center', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                                                    <style>{`::-webkit-scrollbar { display: none; }`}</style>
-                                                    <div className={`w-full md:w-[48%] ${expandedEntries[i] ? 'h-[10vh]' : 'h-[25vh]'} md:!h-[50vh] shrink-0 rounded-[8px] overflow-hidden shadow-[0_8px_60px_rgba(0,0,0,0.5)] transition-all duration-700 ease-in-out`}>
-                                                        <img src={entry.img} alt={entry.subtitle} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'grayscale(60%) contrast(1.08)' }} />
-                                                    </div>
+                                                    <div className="flex flex-col md:flex-row w-full gap-4 md:gap-[4%] max-h-[75vh] md:max-h-none overflow-y-auto md:overflow-visible pb-[80px] md:pb-0" style={{ width: '100%', alignItems: 'center', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                                                        <style>{`::-webkit-scrollbar { display: none; }`}</style>
+                                                        <div className={`w-full md:w-[48%] ${expandedEntries[i] ? 'min-h-[15vh]' : 'min-h-[25vh]'} md:!h-[50vh] shrink-0 rounded-[8px] overflow-hidden shadow-[0_8px_60px_rgba(0,0,0,0.5)] transition-all duration-700 ease-in-out`}>
+                                                            <img src={entry.img} alt={entry.subtitle} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'grayscale(60%) contrast(1.08)' }} />
+                                                        </div>
                                                     <div className="flex-1 flex flex-col justify-center text-center md:text-left items-center md:items-start mt-2 md:mt-0 px-2 md:px-0">
                                                         <div style={{ fontSize: 'clamp(3.5rem, 6vw, 6rem)', fontWeight: 900, color: '#ffffff', lineHeight: 1, marginBottom: '12px', letterSpacing: '-0.03em', fontFamily: "'Inter', sans-serif" }}>
                                                             {entry.year}
@@ -349,7 +381,7 @@ export default function History() {
                             {/* Row 1 */}
                             <div className="flex flex-col md:flex-row items-center gap-10 lg:gap-16 group">
                                 <div className="w-full md:w-1/2 aspect-video overflow-hidden rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 relative">
-                                    <img src="/images/1.jpeg" alt="Maratona di passione" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                                    <img src="/images/1.jpeg" alt="Maratona di passione" loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
                                     <div className="absolute inset-0 bg-navy/20 group-hover:bg-transparent transition-colors duration-700" />
                                 </div>
                                 <div className="w-full md:w-1/2 flex flex-col items-start text-left px-4 md:px-0">
@@ -365,7 +397,7 @@ export default function History() {
                             {/* Row 2 */}
                             <div className="flex flex-col md:flex-row-reverse items-center gap-10 lg:gap-16 group">
                                 <div className="w-full md:w-1/2 aspect-video overflow-hidden rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 relative">
-                                    <img src="https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=800&auto=format&fit=crop" alt="Eravamo testimoni" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                                    <img src="https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=800&auto=format&fit=crop" loading="lazy" decoding="async" alt="Eravamo testimoni" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
                                     <div className="absolute inset-0 bg-navy/20 group-hover:bg-transparent transition-colors duration-700" />
                                 </div>
                                 <div className="w-full md:w-1/2 flex flex-col items-start md:items-end text-left md:text-right px-4 md:px-0">
@@ -381,7 +413,7 @@ export default function History() {
                             {/* Row 3 */}
                             <div className="flex flex-col md:flex-row items-center gap-10 lg:gap-16 group">
                                 <div className="w-full md:w-1/2 aspect-video overflow-hidden rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 relative">
-                                    <img src="/images/campo.png" alt="Il club come famiglia" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                                    <img src="/images/campo.png" alt="Il club come famiglia" loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
                                     <div className="absolute inset-0 bg-navy/20 group-hover:bg-transparent transition-colors duration-700" />
                                 </div>
                                 <div className="w-full md:w-1/2 flex flex-col items-start text-left px-4 md:px-0">
@@ -397,7 +429,7 @@ export default function History() {
                             {/* Row 4 */}
                             <div className="flex flex-col md:flex-row-reverse items-center gap-10 lg:gap-20 group mb-20 lg:mb-40">
                                 <div className="w-full md:w-1/2 aspect-video overflow-hidden rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 relative">
-                                    <img src="/images/4.jpeg" alt="Ospiti illustri" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                                    <img src="/images/4.jpeg" alt="Ospiti illustri" loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
                                     <div className="absolute inset-0 bg-navy/20 group-hover:bg-transparent transition-colors duration-700" />
                                 </div>
                                 <div className="w-full md:w-1/2 flex flex-col items-start md:items-end text-left md:text-right px-4 md:px-0">

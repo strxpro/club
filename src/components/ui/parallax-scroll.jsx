@@ -182,6 +182,8 @@ const SkeletonImage = ({ src, alt, className, motionProps, onClick }) => {
         src={src}
         alt={alt}
         onLoad={handleLoad}
+        loading="lazy"
+        decoding="async"
         className={cn(
           className,
           "transition-all duration-500",
