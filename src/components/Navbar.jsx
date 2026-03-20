@@ -64,7 +64,7 @@ export default function Navbar() {
                             </button>
                         ))}
                         <a 
-                            href="/cagliari.html" 
+                            href="/cagliari" 
                             className="ml-2 text-crimson hover:text-white text-sm font-bold tracking-wider uppercase transition-all px-4 py-1.5 rounded-full border border-crimson/40 bg-crimson/10 hover:bg-crimson hover:border-crimson hover:shadow-[0_0_15px_rgba(200,16,46,0.5)] hover:scale-105 active:scale-95"
                         >
                             Strefa Cagliari
@@ -233,7 +233,7 @@ export default function Navbar() {
                     ))}
                     
                     <a
-                        href="/cagliari.html"
+                        href="/cagliari"
                         style={{
                             width: '100%',
                             display: 'flex',
