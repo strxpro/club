@@ -68,50 +68,7 @@
         .custom-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(200,16,46,0.4); border-radius: 4px; }
 
-        /* PITCH CSS */
-        .pitch {
-            background: linear-gradient(0deg, rgba(34, 139, 34, 0.8) 0%, rgba(0, 100, 0, 0.9) 100%);
-            border: 2px solid rgba(255,255,255,0.6);
-            border-radius: 8px;
-            position: relative;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
-        }
-        .pitch::before {
-            content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: rgba(255,255,255,0.6);
-        }
-        .pitch::after {
-            content: ''; position: absolute; top: 50%; left: 50%; width: 120px; height: 120px; 
-            border: 2px solid rgba(255,255,255,0.6); border-radius: 50%; transform: translate(-50%, -50%);
-        }
-        .penalty-box-top {
-            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-            width: 300px; height: 120px; border: 2px solid rgba(255,255,255,0.6); border-top: 0;
-        }
-        .penalty-arc-top {
-            position: absolute; top: 120px; left: 50%; transform: translateX(-50%);
-            width: 80px; height: 40px; border: 2px solid rgba(255,255,255,0.6); border-top: 0; border-radius: 0 0 80px 80px;
-        }
-        .penalty-box-bottom {
-            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 300px; height: 120px; border: 2px solid rgba(255,255,255,0.6); border-bottom: 0;
-        }
-        .penalty-arc-bottom {
-            position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);
-            width: 80px; height: 40px; border: 2px solid rgba(255,255,255,0.6); border-bottom: 0; border-radius: 80px 80px 0 0;
-        }
 
-        /* FUT CARD CSS */
-        .fut-card {
-            background: linear-gradient(135deg, #1a0505 0%, #c8102e 100%);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 6px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            transition: transform 0.2s ease;
-        }
-        .fut-card:hover {
-            transform: scale(1.15);
-            z-index: 50;
-        }
 
     </style>
 </head>
@@ -210,23 +167,14 @@
             </div>
         </div>
 
-        <!-- SQUAD SECTION (FOOTBALL PITCH) -->
+        <!-- SQUAD SECTION (LIST) -->
         <section class="glass-card p-6 md:p-10 relative overflow-hidden flex flex-col items-center w-full">
-            <div class="flex items-center justify-between w-full mb-12 border-b border-white/10 pb-4">
+            <div class="flex items-center justify-between w-full mb-8 border-b border-white/10 pb-4">
                 <h3 class="text-4xl md:text-5xl font-heading text-white tracking-wider uppercase text-center w-full" data-i18n="cagliari_squad">Kadra Zespołu</h3>
                 <div id="squad-loader" class="loader absolute right-8"></div>
             </div>
             
-            <div class="w-full max-w-4xl mx-auto pitch py-16 px-4 md:px-8 relative overflow-hidden flex flex-col justify-between space-y-8 md:space-y-12" style="min-height: 800px;">
-                <!-- Pitch markings -->
-                <div class="penalty-box-top pointer-events-none"></div>
-                <div class="penalty-arc-top pointer-events-none"></div>
-                <div class="penalty-box-bottom pointer-events-none"></div>
-                <div class="penalty-arc-bottom pointer-events-none"></div>
-                
-                <!-- Squad injected structurally: Attackers -> Midfielders -> Defenders -> Goalkeepers -->
-                <div id="squad-container" class="flex flex-col justify-between h-full bg-transparent w-full relative z-10 gap-8 h-full"></div>
-            </div>
+            <div id="squad-container" class="w-full max-w-4xl mx-auto relative z-10 pb-10"></div>
         </section>
 
     </main>
@@ -550,9 +498,9 @@
             container.innerHTML = html;
         };
 
-        // 4. KADRA ZESPOŁU (BOISKO + FIFA KARTY)
+        // 4. KADRA ZESPOŁU (LISTA)
         async function loadSquad(forceRefresh = false) {
-            const data = await fetchWithCache(`/players/squads?team=${TEAM_ID}`, forceRefresh); // Prawidłowy API-sports endpoint to players/squads
+            const data = await fetchWithCache(`/players/squads?team=${TEAM_ID}`, forceRefresh); 
             document.getElementById('squad-loader').style.display = 'none';
             const container = document.getElementById('squad-container');
 
@@ -561,46 +509,60 @@
                 return;
             }
 
-            // GDD: Format the layout precisely as bottom-to-top pyramid: Goalkeepers, Defenders, Midfielders, Attackers.
+            // GDD: Format the layout precisely as top-to-bottom list: Goalkeepers, Defenders, Midfielders, Attackers.
             const groups = [
-                { id: "Attackers", players: [] },
-                { id: "Midfielders", players: [] },
-                { id: "Defenders", players: [] },
-                { id: "Goalkeepers", players: [] }
+                { id: "Bramkarze", key: "goalkeepers", players: [] },
+                { id: "Obrońcy", key: "defenders", players: [] },
+                { id: "Pomocnicy", key: "midfielders", players: [] },
+                { id: "Napastnicy", key: "attackers", players: [] }
             ];
 
             data[0].players.forEach(p => {
-                let pid = "Midfielders";
-                if(p.position === 'Attacker') pid = 'Attackers';
-                if(p.position === 'Defender') pid = 'Defenders';
-                if(p.position === 'Goalkeeper') pid = 'Goalkeepers';
-                groups.find(g => g.id === pid).players.push(p);
+                let pid = "midfielders";
+                if(p.position === 'Attacker') pid = 'attackers';
+                if(p.position === 'Defender') pid = 'defenders';
+                if(p.position === 'Goalkeeper') pid = 'goalkeepers';
+                groups.find(g => g.key === pid).players.push(p);
             });
 
-            let html = '';
+            let html = '<div class="w-full flex flex-col gap-10">';
             groups.forEach(g => {
                 if(g.players.length === 0) return;
                 
                 // Sort by number
                 g.players.sort((a,b) => (a.number || 99) - (b.number || 99));
 
-                html += `<div class="w-full flex flex-wrap justify-center items-center gap-3 sm:gap-4 md:gap-6 lg:gap-8 z-10 w-full px-2">`;
+                html += `
+                <div class="w-full">
+                    <h4 class="text-xl font-heading text-white/50 tracking-widest uppercase mb-4 border-l-4 border-crimson pl-3" data-i18n="cagliari_${g.key}">${g.id}</h4>
+                    <div class="flex flex-col gap-2">
+                `;
                 
                 g.players.forEach(p => {
-                    // EXACT RENDER FOR FIFA CARD AND <IMG SRC={player.photo} />
                     html += `
-                        <div class="fut-card w-20 sm:w-24 md:w-28 lg:w-32 flex flex-col items-center py-2 px-1 relative">
-                            <span class="absolute top-1 left-2 font-black text-white text-xs md:text-sm drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">${p.number || ''}</span>
-                            <div class="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-white/5 rounded-full overflow-hidden border-2 border-white/50 shadow-lg mt-3 mb-2 flex items-center justify-center">
+                    <div class="flex items-center justify-between p-4 bg-black/40 hover:bg-crimson/10 transition-colors border border-white/5 rounded-xl group">
+                        <div class="flex items-center gap-5 sm:gap-6">
+                            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-crimson/50 transition-colors shrink-0 bg-white/5 flex items-center justify-center">
                                 <img src="${p.photo}" alt="${p.name}" loading="lazy" class="w-full h-full object-cover">
                             </div>
-                            <span class="text-white text-[9px] sm:text-[10px] md:text-xs font-bold text-center w-full truncate px-1 uppercase tracking-tight drop-shadow-md">${p.name.split(' ').pop()}</span>
+                            <div class="flex flex-col border-l border-white/10 pl-5 sm:pl-6">
+                                <span class="text-white font-heading text-xl sm:text-2xl tracking-wider uppercase drop-shadow-sm">${p.name}</span>
+                                <span class="text-white/40 text-[10px] sm:text-xs uppercase tracking-widest mt-1 group-hover:text-white/70 transition-colors" data-i18n="cagliari_${g.key}">${g.id}</span>
+                            </div>
                         </div>
+                        <div class="text-3xl sm:text-4xl text-crimson font-black font-heading opacity-50 flex items-baseline gap-1 group-hover:opacity-100 transition-opacity pr-2 sm:pr-6">
+                            ${p.number ? `
+                                <span class="text-base sm:text-lg text-white/30 font-light opacity-50">#</span>
+                                <div>${p.number}</div>
+                            ` : '-'}
+                        </div>
+                    </div>
                     `;
                 });
                 
-                html += `</div>`;
+                html += `</div></div>`;
             });
+            html += '</div>';
             
             container.innerHTML = html;
         }
