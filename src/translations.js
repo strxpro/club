@@ -396,6 +396,23 @@ export const translations = {
     history_read_less: { it: 'Leggi di meno', en: 'Read less', pl: 'Czytaj mniej', de: 'Weniger lesen', es: 'Leer menos', fr: 'Lire moins' },
     contact_info_title: { it: 'Informazioni', en: 'Information', pl: 'Informacje', de: 'Informationen', es: 'Información', fr: 'Informations' },
 
+    cagliari_main_squad: {
+        pl: 'Główna Kadra',
+        en: 'Main Squad',
+        it: 'Rosa Principale',
+        de: 'Stammkader',
+        es: 'Plantilla Principal',
+        fr: 'Équipe Principale'
+    },
+    cagliari_reserves: {
+        pl: 'Rezerwy',
+        en: 'Reserves',
+        it: 'Riserve',
+        de: 'Reserven',
+        es: 'Reservas',
+        fr: 'Réserve'
+    },
+
     // ─── FOOTER ───
     footer_links: { it: 'Link Rapidi', en: 'Quick Links', pl: 'Szybkie linki', de: 'Schnelllinks', es: 'Enlaces Rápidos', fr: 'Liens Rapides' },
     footer_privacy: { it: 'Privacy Policy', en: 'Privacy Policy', pl: 'Polityka prywatno\u015Bci', de: 'Datenschutzrichtlinie', es: 'Política de privacidad', fr: 'Politique de confidentialité' },

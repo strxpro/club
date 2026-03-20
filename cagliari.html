@@ -498,73 +498,141 @@
             container.innerHTML = html;
         };
 
-        // 4. KADRA ZESPOŁU (LISTA)
+        // 4. KADRA ZESPOŁU (LISTA Z PEŁNYMI IMIONAMI I PODZIAŁEM NA GŁÓWNĄ I REZERWY)
         async function loadSquad(forceRefresh = false) {
-            const data = await fetchWithCache(`/players/squads?team=${TEAM_ID}`, forceRefresh); 
-            document.getElementById('squad-loader').style.display = 'none';
+            document.getElementById('squad-loader').style.display = 'block';
             const container = document.getElementById('squad-container');
 
-            if (!data || !data[0] || !data[0].players) {
-                container.innerHTML = `<div class="w-full text-center py-20 text-white/50 bg-black/50 rounded-lg z-50">Brak dostępnej kadry dla tego zapytania.</div>`;
-                return;
-            }
-
-            // GDD: Format the layout precisely as top-to-bottom list: Goalkeepers, Defenders, Midfielders, Attackers.
-            const groups = [
-                { id: "Bramkarze", key: "goalkeepers", players: [] },
-                { id: "Obrońcy", key: "defenders", players: [] },
-                { id: "Pomocnicy", key: "midfielders", players: [] },
-                { id: "Napastnicy", key: "attackers", players: [] }
-            ];
-
-            data[0].players.forEach(p => {
-                let pid = "midfielders";
-                if(p.position === 'Attacker') pid = 'attackers';
-                if(p.position === 'Defender') pid = 'defenders';
-                if(p.position === 'Goalkeeper') pid = 'goalkeepers';
-                groups.find(g => g.key === pid).players.push(p);
-            });
-
-            let html = '<div class="w-full flex flex-col gap-10">';
-            groups.forEach(g => {
-                if(g.players.length === 0) return;
+            try {
+                // Fetch `/players/squads` for reliable shirt numbers and positions
+                const squadData = await fetchWithCache(`/players/squads?team=${TEAM_ID}`, forceRefresh); 
                 
-                // Sort by number
-                g.players.sort((a,b) => (a.number || 99) - (b.number || 99));
-
-                html += `
-                <div class="w-full">
-                    <h4 class="text-xl font-heading text-white/50 tracking-widest uppercase mb-4 border-l-4 border-crimson pl-3" data-i18n="cagliari_${g.key}">${g.id}</h4>
-                    <div class="flex flex-col gap-2">
-                `;
+                // Fetch `/players` for full names and statistics (minutes played to determine reserves)
+                const playersP1 = await fetchWithCache(`/players?team=${TEAM_ID}&season=${currentSeason}&page=1`, forceRefresh);
+                const playersP2 = await fetchWithCache(`/players?team=${TEAM_ID}&season=${currentSeason}&page=2`, forceRefresh);
                 
-                g.players.forEach(p => {
-                    html += `
-                    <div class="flex items-center justify-between p-4 bg-black/40 hover:bg-crimson/10 transition-colors border border-white/5 rounded-xl group">
-                        <div class="flex items-center gap-5 sm:gap-6">
-                            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-crimson/50 transition-colors shrink-0 bg-white/5 flex items-center justify-center">
-                                <img src="${p.photo}" alt="${p.name}" loading="lazy" class="w-full h-full object-cover">
-                            </div>
-                            <div class="flex flex-col border-l border-white/10 pl-5 sm:pl-6">
-                                <span class="text-white font-heading text-xl sm:text-2xl tracking-wider uppercase drop-shadow-sm">${p.name}</span>
-                                <span class="text-white/40 text-[10px] sm:text-xs uppercase tracking-widest mt-1 group-hover:text-white/70 transition-colors" data-i18n="cagliari_${g.key}">${g.id}</span>
-                            </div>
-                        </div>
-                        <div class="text-3xl sm:text-4xl text-crimson font-black font-heading opacity-50 flex items-baseline gap-1 group-hover:opacity-100 transition-opacity pr-2 sm:pr-6">
-                            ${p.number ? `
-                                <span class="text-base sm:text-lg text-white/30 font-light opacity-50">#</span>
-                                <div>${p.number}</div>
-                            ` : '-'}
-                        </div>
-                    </div>
-                    `;
+                let detailedPlayers = [];
+                if (playersP1) detailedPlayers = detailedPlayers.concat(playersP1);
+                if (playersP2) detailedPlayers = detailedPlayers.concat(playersP2);
+
+                if (!squadData || !squadData[0] || !squadData[0].players) {
+                    container.innerHTML = `<div class="w-full text-center py-20 text-white/50 bg-black/50 rounded-lg z-50">Brak dostępnej kadry dla tego zapytania.</div>`;
+                    return;
+                }
+
+                // Merge data: Squad API defines the base list, Detailed API gives full name & stats
+                const mergedSquad = squadData[0].players.map(sp => {
+                    const dpMatch = detailedPlayers.find(dp => dp.player.id === sp.id);
+                    let fullName = sp.name;
+                    let minutes = 0;
+                    
+                    if (dpMatch) {
+                        fullName = `${dpMatch.player.firstname} ${dpMatch.player.lastname}`.trim();
+                        // Find the league stats to sum minutes, or just grab the first valid statistic
+                        const stats = dpMatch.statistics || [];
+                        stats.forEach(st => {
+                            if (st.games && st.games.minutes) minutes += st.games.minutes;
+                        });
+                    }
+
+                    return {
+                        ...sp,
+                        fullName: fullName,
+                        minutes: minutes
+                    };
                 });
+
+                // Separate Main Squad vs Reserves
+                // Heuristic: If average club minutes are low (e.g. season just started), we classify everyone as Main.
+                // Otherwise, players with 0-50 minutes are likely reserves.
+                const totalMinutesInSquad = mergedSquad.reduce((sum, p) => sum + p.minutes, 0);
+                const isNewSeason = totalMinutesInSquad < 500; 
+
+                // Let's sort them all by minutes played descending so we can easily pick the top ~16-18
+                mergedSquad.sort((a,b) => b.minutes - a.minutes);
                 
-                html += `</div></div>`;
-            });
-            html += '</div>';
-            
-            container.innerHTML = html;
+                let mainSquad = [];
+                let reserves = [];
+
+                if (isNewSeason) {
+                    // If no one played yet, use ID or number to guess, but mostly put everyone in main
+                    mainSquad = mergedSquad; 
+                } else {
+                    // Top 16 players by minutes are "Main Squad", the rest are "Reserves"
+                    mainSquad = mergedSquad.slice(0, 16);
+                    reserves = mergedSquad.slice(16);
+                }
+
+                // Render function for a group of players
+                const renderGroup = (players, titleKey, titleFallback) => {
+                    if(players.length === 0) return '';
+                    
+                    // Inside the group, sort by Position roughly, then by Number
+                    const posOrder = { 'Goalkeeper': 1, 'Defender': 2, 'Midfielder': 3, 'Attacker': 4 };
+                    players.sort((a,b) => {
+                        if (posOrder[a.position] !== posOrder[b.position]) return posOrder[a.position] - posOrder[b.position];
+                        return (a.number || 99) - (b.number || 99);
+                    });
+
+                    let html = `
+                    <div class="w-full">
+                        <h4 class="text-2xl font-heading text-white/80 tracking-widest uppercase mb-6 border-l-4 border-crimson pl-4" data-i18n="${titleKey}">${titleFallback}</h4>
+                        <div class="flex flex-col gap-2">
+                    `;
+                    
+                    players.forEach(p => {
+                        let posKey = "midfielders";
+                        if(p.position === 'Attacker') posKey = 'attackers';
+                        if(p.position === 'Defender') posKey = 'defenders';
+                        if(p.position === 'Goalkeeper') posKey = 'goalkeepers';
+                        let posFallback = p.position;
+                        if(posKey === 'attackers') posFallback = 'Napastnicy';
+                        if(posKey === 'defenders') posFallback = 'Obrońcy';
+                        if(posKey === 'midfielders') posFallback = 'Pomocnicy';
+                        if(posKey === 'goalkeepers') posFallback = 'Bramkarze';
+
+                        html += `
+                        <div class="flex items-center justify-between p-4 bg-black/40 hover:bg-crimson/10 transition-colors border border-white/5 rounded-xl group">
+                            <div class="flex items-center gap-5 sm:gap-6">
+                                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-crimson/50 transition-colors shrink-0 bg-white/5 flex items-center justify-center">
+                                    <img src="${p.photo}" alt="${p.fullName}" loading="lazy" class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex flex-col border-l border-white/10 pl-5 sm:pl-6">
+                                    <span class="text-white font-heading text-xl sm:text-2xl tracking-wider uppercase drop-shadow-sm">${p.fullName}</span>
+                                    <span class="text-white/40 text-[10px] sm:text-xs uppercase tracking-widest mt-1 group-hover:text-white/70 transition-colors" data-i18n="cagliari_${posKey}">${posFallback}</span>
+                                </div>
+                            </div>
+                            <div class="text-3xl sm:text-4xl text-crimson font-black font-heading opacity-50 flex items-baseline gap-1 group-hover:opacity-100 transition-opacity pr-2 sm:pr-6">
+                                ${p.number ? `
+                                    <span class="text-base sm:text-lg text-white/30 font-light opacity-50">#</span>
+                                    <div>${p.number}</div>
+                                ` : '-'}
+                            </div>
+                        </div>
+                        `;
+                    });
+                    
+                    html += `</div></div>`;
+                    return html;
+                };
+
+                let finalHtml = '<div class="w-full flex flex-col gap-12">';
+                finalHtml += renderGroup(mainSquad, 'cagliari_main_squad', 'Główna Kadra');
+                finalHtml += renderGroup(reserves, 'cagliari_reserves', 'Rezerwy');
+                finalHtml += '</div>';
+                
+                container.innerHTML = finalHtml;
+                document.getElementById('squad-loader').style.display = 'none';
+
+                if(window.applyCagliariTranslations) {
+                    window.applyCagliariTranslations();
+                }
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('squad-loader').style.display = 'none';
+                container.innerHTML = `<div class="w-full text-center py-20 text-white/50 bg-black/50 rounded-lg z-50">Wystąpił błąd podczas pobierania kadr. Spróbuj później.</div>`;
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
