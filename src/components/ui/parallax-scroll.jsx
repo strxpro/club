@@ -22,10 +22,16 @@ const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext, getSrc, getAl
   }, [onClose, onPrev, onNext, zoomed]);
 
   // Reset zoom when switching images
-  useEffect(() => { setZoomed(false); }, [currentIndex]);
+  useEffect(() => {
+    setZoomed(false);
+  }, [currentIndex]);
 
   const src = getSrc(images[currentIndex]);
   const alt = getAlt(images[currentIndex], `Foto ${currentIndex + 1}`);
+  const toggleZoom = useCallback((e) => {
+    e.stopPropagation();
+    setZoomed((prev) => !prev);
+  }, []);
 
   return (
     <motion.div
@@ -33,7 +39,7 @@ const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext, getSrc, getAl
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      onClick={() => { if (zoomed) setZoomed(false); else onClose(); }}
+      onClick={onClose}
       style={{
         position: 'fixed',
         inset: 0,
@@ -52,19 +58,30 @@ const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext, getSrc, getAl
         position: 'absolute', top: '24px', left: '50%', transform: 'translateX(-50%)',
         color: 'rgba(255,255,255,0.5)', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em',
         zIndex: 2,
+        pointerEvents: 'none',
       }}>
         {currentIndex + 1} / {images.length}
       </div>
+
+      <button
+        onClick={(e) => { e.stopPropagation(); onClose(); }}
+        className="fixed z-[1000] flex items-center justify-center w-12 h-12 md:w-14 md:h-14 bg-black/75 hover:bg-black/90 rounded-full border border-white/20 text-white transition-all shadow-[0_20px_45px_rgba(0,0,0,0.45)] backdrop-blur-md"
+        style={{ top: 'calc(env(safe-area-inset-top, 0px) + 12px)', right: 'calc(env(safe-area-inset-right, 0px) + 12px)' }}
+        title="Close (Esc)"
+        aria-label="Close gallery"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
 
       {/* Close button relocated to individual image containers for better visibility */}
 
       {/* Zoomed view */}
       {zoomed ? (
         <div
-          onClick={() => setZoomed(false)}
-          className="flex items-center justify-center w-full h-full p-4 overflow-auto cursor-zoom-out"
+          className="flex items-center justify-center w-full h-full p-4 pt-20 md:p-6 overflow-auto cursor-zoom-out"
+          style={{ touchAction: 'pan-x pan-y pinch-zoom' }}
         >
-          <div className="relative inline-block isolate">
+          <div className="relative inline-block isolate max-w-none">
             <motion.img
               key={currentIndex + '-zoomed'}
               initial={{ scale: 0.9, opacity: 0 }}
@@ -72,35 +89,27 @@ const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext, getSrc, getAl
               transition={{ duration: 0.25 }}
               src={src}
               alt={alt}
-              onClick={(e) => e.stopPropagation()}
-              className="rounded-[12px] shadow-2xl cursor-zoom-out"
+              onClick={toggleZoom}
+              className="rounded-[12px] shadow-2xl cursor-zoom-out select-none"
               style={{
                 maxWidth: 'none',
                 maxHeight: 'none',
-                objectFit: 'none' // Ensures intrinsic image size without artificial stretching
+                objectFit: 'none',
+                touchAction: 'pan-x pan-y pinch-zoom'
               }}
             />
-            {/* Close button strictly on the photo */}
-            <button
-              onClick={(e) => { e.stopPropagation(); onClose(); }}
-              className="absolute top-2 right-2 md:top-4 md:right-4 z-[999] flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-black/90 rounded-full border border-white/20 text-white transition-all shadow-xl backdrop-blur-md"
-              title="Close (Esc)"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
           </div>
         </div>
       ) : (
         /* Normal view with arrows */
         <div
-          onClick={(e) => e.stopPropagation()}
-          className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 w-full px-4"
+          className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 w-full px-4 pt-16 pb-6 md:py-0"
           style={{ cursor: 'default' }}
         >
           {/* Prev button (Desktop) */}
           {images.length > 1 && (
             <button
-              onClick={onPrev}
+              onClick={(e) => { e.stopPropagation(); onPrev(); }}
               className="hidden md:flex shrink-0 items-center justify-center w-12 h-12 rounded-full border border-white/10 bg-white/[0.08] hover:bg-white/[0.15] transition-all text-white"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -108,7 +117,7 @@ const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext, getSrc, getAl
           )}
 
           {/* Image */}
-          <div className="relative inline-block isolate" onClick={(e) => { e.stopPropagation(); setZoomed(true); }}>
+          <div className="relative inline-block isolate max-w-[86vw] sm:max-w-[90vw] md:max-w-none">
             <motion.img
               key={currentIndex}
               initial={{ opacity: 0, scale: 0.92 }}
@@ -117,22 +126,16 @@ const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext, getSrc, getAl
               transition={{ duration: 0.3, ease: 'easeOut' }}
               src={src}
               alt={alt}
-              className="w-auto h-auto max-w-[90vw] md:max-w-[65vw] lg:max-w-[55vw] max-h-[65vh] md:max-h-[70vh] object-contain rounded-[12px] shadow-[0_30px_100px_rgba(0,0,0,0.6)] cursor-zoom-in"
+              onClick={toggleZoom}
+              className="w-auto h-auto max-w-[86vw] sm:max-w-[90vw] md:max-w-[65vw] lg:max-w-[55vw] max-h-[58vh] sm:max-h-[65vh] md:max-h-[70vh] object-contain rounded-[12px] shadow-[0_30px_100px_rgba(0,0,0,0.6)] cursor-zoom-in"
+              style={{ touchAction: 'manipulation' }}
             />
-            {/* Close button strictly on the photo */}
-            <button
-              onClick={(e) => { e.stopPropagation(); onClose(); }}
-              className="absolute top-2 right-2 md:top-4 md:right-4 z-[999] flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-black/90 rounded-full border border-white/20 text-white transition-all shadow-xl backdrop-blur-md"
-              title="Close (Esc)"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
           </div>
 
           {/* Next button (Desktop) */}
           {images.length > 1 && (
             <button
-              onClick={onNext}
+              onClick={(e) => { e.stopPropagation(); onNext(); }}
               className="hidden md:flex shrink-0 items-center justify-center w-12 h-12 rounded-full border border-white/10 bg-white/[0.08] hover:bg-white/[0.15] transition-all text-white"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -143,13 +146,13 @@ const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext, getSrc, getAl
           {images.length > 1 && (
             <div className="flex justify-center gap-6 md:hidden mt-2">
               <button
-                onClick={onPrev}
+                onClick={(e) => { e.stopPropagation(); onPrev(); }}
                 className="flex items-center justify-center w-12 h-12 rounded-full border border-white/10 bg-white/[0.08] text-white"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
               </button>
               <button
-                onClick={onNext}
+                onClick={(e) => { e.stopPropagation(); onNext(); }}
                 className="flex items-center justify-center w-12 h-12 rounded-full border border-white/10 bg-white/[0.08] text-white"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -163,7 +166,7 @@ const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext, getSrc, getAl
 };
 
 /* ── Skeleton image with click ── */
-const SkeletonImage = ({ src, alt, className, motionProps, onClick }) => {
+const SkeletonImage = ({ src, alt, className, motionProps, onClick, loading = 'lazy', fetchPriority = 'auto' }) => {
   const [loaded, setLoaded] = useState(false);
   const handleLoad = useCallback(() => setLoaded(true), []);
 
@@ -182,7 +185,8 @@ const SkeletonImage = ({ src, alt, className, motionProps, onClick }) => {
         src={src}
         alt={alt}
         onLoad={handleLoad}
-        loading="lazy"
+        loading={loading}
+        fetchPriority={fetchPriority}
         decoding="async"
         className={cn(
           className,
@@ -245,6 +249,8 @@ export const ParallaxScrollSecond = ({
             alt={getAlt(el, "Galleria foto " + (idx + 1))}
             className="w-full h-auto rounded-xl shadow-lg"
             onClick={() => openLightbox(idx)}
+            loading="eager"
+            fetchPriority={idx < 6 ? 'high' : 'auto'}
             motionProps={{
               initial: { opacity: 0, y: 20 },
               whileInView: { opacity: 1, y: 0 },

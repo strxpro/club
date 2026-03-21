@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/images/LOGO%20CAGLIARI%20CLUB%20PNG-OK.png">
+    <link rel="apple-touch-icon" href="/images/LOGO%20CAGLIARI%20CLUB%20PNG-OK.png">
+    <link rel="manifest" href="/images/favicon/site.webmanifest">
     <title>Cagliari Calcio - Strefa Kibica</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -30,6 +33,9 @@
             background-color: #060d1e;
             color: rgba(255, 255, 255, 0.85);
             -webkit-font-smoothing: antialiased;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
         h1, h2, h3, h4, .font-heading {
             font-family: 'Bebas Neue', sans-serif;
@@ -38,7 +44,7 @@
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
+            border-radius: 20px;
         }
         .live-pulse {
             animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -64,42 +70,149 @@
 
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(200,16,46,0.4); border-radius: 4px; }
 
+        /* Custom Dropdown Glassmorphism */
+        .season-dropdown-content {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            min-width: 240px;
+            background: linear-gradient(180deg, rgba(20, 34, 74, 0.95) 0%, rgba(6, 13, 30, 0.96) 100%);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.45);
+            z-index: 100;
+            overflow: hidden;
+            padding: 8px;
+            animation: fadeInDown 0.3s ease-out;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translate(-50%, -10px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .season-dropdown.active .season-dropdown-content { display: block; }
+        .season-dropdown.active #season-trigger {
+            border-color: rgba(200, 16, 46, 0.45);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 1px rgba(200, 16, 46, 0.15), 0 14px 30px rgba(0,0,0,0.35);
+        }
+        .season-dropdown.active #season-trigger svg { transform: rotate(180deg); color: rgba(255,255,255,0.95); }
+        .season-option { border-radius: 14px; }
+        .season-option:hover { background: rgba(200, 16, 46, 0.16); color: rgba(255, 255, 255, 1); }
 
+        /* Fixtures Carousel Improvements */
+        #calendar-matches {
+            scroll-behavior: smooth;
+        }
 
+        .stats-table {
+            min-width: 580px;
+        }
+
+        .match-card-panel,
+        .match-card-side,
+        .squad-player-meta,
+        .squad-player-card {
+            min-width: 0;
+        }
+
+        .match-score-shell {
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .squad-player-name {
+            word-break: break-word;
+        }
+
+        @media (max-width: 1023px) {
+            .match-live-layout,
+            .match-next-layout {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .match-next-layout .match-card-side,
+            .match-next-layout .match-card-side--away {
+                align-items: center !important;
+                text-align: center !important;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .stats-table {
+                min-width: 540px;
+            }
+
+            .match-live-heading {
+                letter-spacing: 0.12em;
+            }
+
+            .match-live-team-title {
+                font-size: clamp(1.85rem, 8vw, 3rem);
+            }
+
+            .match-score-text {
+                font-size: clamp(3.4rem, 15vw, 5rem);
+            }
+
+            .match-next-date {
+                font-size: clamp(2.6rem, 11vw, 3.75rem);
+            }
+
+            .match-next-opponent {
+                font-size: clamp(1.75rem, 8vw, 2.5rem);
+            }
+
+            .squad-player-card {
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .squad-player-number {
+                align-self: flex-end;
+                padding-right: 0;
+            }
+        }
+        
     </style>
 </head>
-<body class="bg-navy-dark min-h-screen pb-24 relative overflow-x-hidden">
+<body class="bg-navy-dark overflow-x-hidden">
 
     <div class="fixed inset-0 pointer-events-none z-[-1]" style="background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(20, 34, 74, 0.5) 0%, transparent 50%), radial-gradient(ellipse 70% 50% at 20% 70%, rgba(20, 34, 74, 0.3) 0%, transparent 50%);"></div>
 
     <!-- REACT NAVBAR MOUNT -->
     <div id="cagliari-navbar-root"></div>
 
-    <main class="container-main mt-32 xl:mt-40 space-y-10 relative z-10">
+    <main class="container-main mt-28 md:mt-32 xl:mt-40 space-y-8 md:space-y-12 relative z-10 flex-grow pb-20 md:pb-24">
         
         <!-- HEADER -->
-        <header class="text-center space-y-4 mb-4 flex flex-col items-center">
-            <div class="relative inline-block w-48 mb-3">
-                <select id="global-season-selector" class="w-full appearance-none px-6 py-2 rounded-full border border-white/10 bg-white/5 text-[11px] font-bold tracking-[0.2em] text-white/60 cursor-pointer outline-none hover:bg-white/10 hover:text-white transition-colors text-center uppercase">
-                    <option value="2023" class="bg-navy-dark text-white/80">SEZON 2023 / 24</option>
-                    <option value="2024" class="bg-navy-dark text-white/80" selected>SEZON 2024 / 25</option>
-                    <option value="2025" class="bg-navy-dark text-white/80">SEZON 2025 / 26</option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-white/40">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        <header class="text-center space-y-6 flex flex-col items-center">
+            <!-- CUSTOM SEASON SELECTOR -->
+            <div class="relative inline-block season-dropdown" id="season-dropdown">
+                <button id="season-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" class="flex items-center justify-between gap-4 min-w-[240px] px-7 py-3.5 rounded-[20px] border border-white/10 bg-white/5 text-xs font-bold tracking-[0.24em] text-white hover:bg-white/10 transition-all uppercase shadow-[0_14px_35px_rgba(0,0,0,0.25)] group">
+                    <span id="current-season-label">SEZON 2024 / 25</span>
+                    <svg class="w-4 h-4 text-white/40 group-hover:text-crimson transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="season-dropdown-content" id="season-dropdown-options">
+                    <div class="season-option px-5 py-3.5 cursor-pointer text-white/70 hover:text-white transition-all border-b border-white/5 flex items-center justify-between" data-value="2024">SEZON 2024 / 25</div>
+                    <div class="season-option px-5 py-3.5 cursor-pointer text-white hover:text-white transition-all font-bold bg-white/5 flex items-center justify-between" data-value="2025">SEZON 2025 / 26</div>
                 </div>
             </div>
-            <h2 class="text-5xl md:text-7xl font-heading text-white tracking-widest uppercase mt-0" data-i18n="cagliari_stats_title">
+
+            <h2 class="text-4xl sm:text-5xl md:text-8xl font-heading text-white tracking-[0.14em] md:tracking-widest uppercase mt-4 leading-none" data-i18n="cagliari_stats_title">
                 Aktualne <span class="text-crimson">Statystyki</span>
             </h2>
         </header>
 
         <!-- LIVE MATCH / NEXT MATCH SECTION -->
-        <section class="glass-card p-6 md:p-10 flex flex-col items-center relative overflow-hidden w-full border border-white/10">
+        <section class="glass-card p-4 sm:p-6 md:p-10 flex flex-col items-center relative overflow-hidden w-full border border-white/10">
             <div id="live-pulse-bg" class="absolute inset-0 bg-crimson/5 blur-3xl -z-10 animate-pulse hidden"></div>
             <div id="live-match-full" class="w-full flex flex-col items-center pb-4 pt-2">
                 <!-- Content Injected via JS -->
@@ -107,25 +220,25 @@
         </section>
 
         <!-- GRID SYSTEM -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 xl:gap-8">
             
             <!-- STANDINGS TABLE -->
-            <section class="lg:col-span-2 glass-card p-6 md:p-8 flex flex-col relative overflow-hidden">
+            <section class="lg:col-span-2 glass-card p-4 sm:p-6 md:p-8 flex flex-col relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-crimson/5 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
                 <div class="flex items-center justify-between mb-8 pb-3 border-b border-white/10">
                     <h3 class="text-3xl font-heading text-white tracking-wide" data-i18n="cagliari_standings">Tabela Serie A</h3>
                     <div id="standings-loader" class="loader"></div>
                 </div>
-                <div class="overflow-x-auto pb-4">
-                    <table class="w-full text-left text-sm whitespace-nowrap">
+                <div class="overflow-x-auto pb-2 sm:pb-4 -mx-2 px-2 sm:mx-0 sm:px-0">
+                    <table class="stats-table w-full text-left text-sm whitespace-nowrap">
                         <thead class="text-xs uppercase tracking-wider text-white/40 border-b border-white/5">
                             <tr>
-                                <th class="py-3 px-3 font-semibold">Poz</th>
-                                <th class="py-3 px-3 font-semibold">Klub</th>
-                                <th class="py-3 px-2 font-semibold text-center">M</th>
-                                <th class="py-3 px-2 font-semibold text-center">Z-R-P</th>
-                                <th class="py-3 px-2 font-semibold text-center">Gole</th>
-                                <th class="py-3 px-2 font-bold text-center text-crimson text-[13px]">Pkt</th>
+                                <th class="py-3 px-3 font-semibold" data-i18n="cagliari_table_position">Poz</th>
+                                <th class="py-3 px-3 font-semibold" data-i18n="cagliari_table_club">Klub</th>
+                                <th class="py-3 px-2 font-semibold text-center" data-i18n="cagliari_table_played">M</th>
+                                <th class="py-3 px-2 font-semibold text-center" data-i18n="cagliari_table_record">Z-R-P</th>
+                                <th class="py-3 px-2 font-semibold text-center" data-i18n="cagliari_table_goals">Gole</th>
+                                <th class="py-3 px-2 font-bold text-center text-crimson text-[13px]" data-i18n="cagliari_table_points">Pkt</th>
                             </tr>
                         </thead>
                         <tbody id="standings-body" class="divide-y divide-white/5 text-white/80">
@@ -138,43 +251,51 @@
 
             <!-- RIGHT COLUMN: CALENDAR & LAST MATCH -->
             <div class="flex flex-col gap-8 h-full">
-                <!-- CALENDAR -->
-                <section class="glass-card p-6 md:p-8 flex flex-col flex-grow min-h-[400px]">
-                    <div class="flex items-center justify-between mb-5 border-b border-white/10 pb-3 shrink-0">
-                        <h3 class="text-2xl font-heading text-white tracking-wide uppercase">Terminarz</h3>
+                <!-- CALENDAR / FIXTURES -->
+                <section class="glass-card p-4 sm:p-6 md:p-8 flex flex-col flex-grow min-h-[420px] sm:min-h-[450px] relative">
+                    <div class="flex items-center justify-between mb-6 border-b border-white/10 pb-4 shrink-0">
+                        <h3 class="text-3xl font-heading text-white tracking-wide uppercase" data-i18n="cagliari_calendar">Terminarz</h3>
                         <div id="calendar-loader" class="loader scale-75"></div>
                     </div>
                     
-                    <div class="flex flex-col gap-3 mb-4 shrink-0">
-                        <div id="cal-months" class="flex overflow-x-auto hide-scrollbar gap-2 pb-2 border-b border-white/5">
-                            <!-- Populated by JS -->
+                    <div class="relative flex flex-col gap-4 mb-6 shrink-0">
+                        <div class="flex items-center justify-between w-full">
+                            <button id="cal-prev" class="p-2 hover:bg-white/10 rounded-full transition-colors text-white/40 hover:text-white">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            </button>
+                            <div id="cal-months" class="flex overflow-x-auto hide-scrollbar gap-4 px-2 scroll-smooth items-center">
+                                <!-- Populated by JS -->
+                            </div>
+                            <button id="cal-next" class="p-2 hover:bg-white/10 rounded-full transition-colors text-white/40 hover:text-white">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
                         </div>
                     </div>
                     
-                    <div id="calendar-matches" class="flex flex-col gap-3 overflow-y-auto custom-scroll pr-2 flex-grow min-h-[250px] bg-black/10 rounded-xl p-3 border border-white/5 relative">
+                    <div id="calendar-matches" class="flex flex-col gap-3 sm:gap-4 overflow-y-auto custom-scroll pr-1 sm:pr-2 flex-grow min-h-[280px] bg-black/20 rounded-2xl p-3 sm:p-4 border border-white/5 shadow-inner">
                         <!-- Matches -->
                     </div>
                 </section>
 
                 <!-- LAST MATCH -->
-                <section class="glass-card p-6 md:p-8 flex flex-col justify-center border border-white/10">
+                <section class="glass-card p-4 sm:p-6 md:p-8 flex flex-col justify-center border border-white/10">
                     <h3 class="text-2xl font-heading text-white tracking-wide uppercase border-b border-white/10 pb-3 mb-6" data-i18n="cagliari_latest_match">Ostatni Mecz</h3>
-                    <div id="last-match-highlight" class="flex flex-col items-center justify-center min-h-[140px] w-full">
+                    <div id="latest-matches-highlight" class="flex flex-col items-stretch justify-center gap-4 min-h-[140px] w-full">
                         <!-- Injected -->
-                        <p class="text-white/40 text-sm">Ładowanie...</p>
+                        <p class="text-white/40 text-sm" data-i18n="cagliari_loading">Ładowanie...</p>
                     </div>
                 </section>
             </div>
         </div>
 
         <!-- SQUAD SECTION (LIST) -->
-        <section class="glass-card p-6 md:p-10 relative overflow-hidden flex flex-col items-center w-full">
+        <section class="glass-card p-4 sm:p-6 md:p-10 relative overflow-hidden flex flex-col items-center w-full">
             <div class="flex items-center justify-between w-full mb-8 border-b border-white/10 pb-4">
-                <h3 class="text-4xl md:text-5xl font-heading text-white tracking-wider uppercase text-center w-full" data-i18n="cagliari_squad">Kadra Zespołu</h3>
-                <div id="squad-loader" class="loader absolute right-8"></div>
+                <h3 class="text-3xl sm:text-4xl md:text-5xl font-heading text-white tracking-wider uppercase text-center w-full" data-i18n="cagliari_squad">Kadra Zespołu</h3>
+                <div id="squad-loader" class="loader absolute right-4 sm:right-8"></div>
             </div>
             
-            <div id="squad-container" class="w-full max-w-4xl mx-auto relative z-10 pb-10"></div>
+            <div id="squad-container" class="w-full max-w-5xl mx-auto relative z-10 pb-10"></div>
         </section>
 
     </main>
@@ -183,87 +304,570 @@
     <script>
         // CONFIGURATION
         const API_KEY = 'cef830252713a75968dd501948b06464';
-        const BASE_URL = 'https://v3.football.api-sports.io';
+        const USE_DEV_PROXY = ['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.port === '5173';
+        const BASE_URL = USE_DEV_PROXY ? '/api/api-sports' : 'https://v3.football.api-sports.io';
+        const FOOTBALL_DATA_API_KEY = 'c96cd633e2474963bd0512cde35d0324';
+        const FOOTBALL_DATA_BASE_URL = USE_DEV_PROXY ? '/api/football-data/v4' : 'https://api.football-data.org/v4';
         const LEAGUE_ID = 135; 
-        const TEAM_ID = 490;   
-        let currentSeason = 2024; // DOMYŚLNY SEZON WG WYMAGAŃ UŻYTKOWNIKA
-        const CACHE_TTL = 3 * 60 * 60 * 1000; 
+        const LEAGUE_CODE = 'SA';
+        const TEAM_ID = 104;   
+        const API_SPORTS_TEAM_ID = 490;
+        const CURRENT_SEASON = 2025;
+        const AVAILABLE_SEASONS = [2024, CURRENT_SEASON];
+        const LATEST_SEASON = CURRENT_SEASON;
+        const LIVE_STATUSES = ['1H', '2H', 'HT', 'ET', 'BT', 'P', 'SUSP', 'INT', 'LIVE'];
+        const UPCOMING_STATUSES = ['TBD', 'NS'];
+        const FINISHED_STATUSES = ['FT', 'AET', 'PEN'];
+        const STANDINGS_REFRESH_INTERVAL = 5 * 60 * 1000;
+        let currentSeason = CURRENT_SEASON; 
         
         const headers = { "x-apisports-key": API_KEY };
+        const footballDataHeaders = { "X-Auth-Token": FOOTBALL_DATA_API_KEY };
+        const localeMap = { 'pl': 'pl-PL', 'it': 'it-IT', 'en': 'en-GB', 'de': 'de-DE', 'es': 'es-ES', 'fr': 'fr-FR' };
         let ALL_FIXTURES = [];
+        let fixturesRefreshInterval = null;
+        let standingsRefreshInterval = null;
 
-        const MONTHS_PL_SHORT = ['STY', 'LUT', 'MAR', 'KWI', 'MAJ', 'CZE', 'LIP', 'SIE', 'WRZ', 'PAŹ', 'LIS', 'GRU'];
-        const MONTHS_PL_FULL = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
-
-        async function fetchWithCache(endpoint, forceRefresh = false) {
-            const cacheKey = `cagliari_cache_${endpoint}`;
-            const cached = localStorage.getItem(cacheKey);
-            
-            if (cached && !forceRefresh) {
-                try {
-                    const { timestamp, data } = JSON.parse(cached);
-                    if (Date.now() - timestamp < CACHE_TTL) return data;
-                } catch(e) {}
-            }
+        async function fetchFootballData(endpoint) {
             try {
-                const response = await fetch(`${BASE_URL}${endpoint}`, { method: 'GET', headers });
+                const response = await fetch(`${FOOTBALL_DATA_BASE_URL}${endpoint}`, { method: 'GET', headers: footballDataHeaders });
                 const data = await response.json();
-                if (data.errors && Object.keys(data.errors).length > 0) {
-                    console.error("API Limit or Plan Error: ", data.errors);
-                    throw new Error("API Error: " + JSON.stringify(data.errors));
+                console.log(data);
+
+                if (!response.ok) {
+                    throw new Error(data.message || `HTTP ${response.status}`);
                 }
-                if (data.response) {
-                    localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: data.response }));
-                    return data.response;
-                }
-                throw new Error("Invalid Response");
+
+                return data;
             } catch (error) {
-                if (cached) return JSON.parse(cached).data;
+                console.error("Football-Data request failed:", endpoint, error);
                 return null;
             }
         }
 
-        // SEZON SELECTOR LOGIC
-        document.getElementById('global-season-selector').addEventListener('change', (e) => {
-            currentSeason = parseInt(e.target.value);
-            
+        async function fetchApiData(endpoint) {
+            try {
+                const response = await fetch(`${BASE_URL}${endpoint}`, { method: 'GET', headers });
+                const data = await response.json();
+                console.log(data);
+
+                const apiErrorMessage = data.errors && Object.keys(data.errors).length > 0
+                    ? Object.entries(data.errors)
+                        .filter(([, value]) => value)
+                        .map(([key, value]) => `${key}: ${value}`)
+                        .join(' | ')
+                    : '';
+
+                if (!response.ok || apiErrorMessage) {
+                    throw new Error(apiErrorMessage || data.message || `HTTP ${response.status}`);
+                }
+
+                if (data.response) {
+                    return data.response;
+                }
+
+                throw new Error("Invalid Response");
+            } catch (error) {
+                console.error("API-Sports request failed:", endpoint, error);
+                return null;
+            }
+        }
+
+        function t(key, fallback = key) {
+            if (window.getCagliariTranslation) return window.getCagliariTranslation(key, fallback);
+            return fallback;
+        }
+
+        function getCurrentLang() {
+            let storedLang = '';
+
+            try {
+                storedLang = window.localStorage?.getItem('appLanguage') || '';
+            } catch (error) {
+                storedLang = '';
+            }
+
+            const lang = (storedLang || window.__appLanguage || document.documentElement.lang || 'it').slice(0, 2).toLowerCase();
+            return localeMap[lang] ? lang : 'it';
+        }
+
+        function getCurrentLocale() {
+            return localeMap[getCurrentLang()] || 'it-IT';
+        }
+
+        const TEAM_NAME_SHORTCUTS = Object.freeze({
+            'Cagliari Calcio': 'Cagliari',
+            'FC Internazionale Milano': 'Inter',
+            'Internazionale': 'Inter',
+            'Inter Milan': 'Inter',
+            'AC Milan': 'Milan',
+            'Juventus FC': 'Juventus',
+            'AS Roma': 'Roma',
+            'SS Lazio': 'Lazio',
+            'SSC Napoli': 'Napoli',
+            'Atalanta BC': 'Atalanta',
+            'ACF Fiorentina': 'Fiorentina',
+            'Bologna FC 1909': 'Bologna',
+            'Torino FC': 'Torino',
+            'Genoa CFC': 'Genoa',
+            'Parma Calcio 1913': 'Parma',
+            'Como 1907': 'Como',
+            'Udinese Calcio': 'Udinese',
+            'US Lecce': 'Lecce',
+            'Hellas Verona': 'Verona',
+            'Hellas Verona FC': 'Verona',
+            'Venezia FC': 'Venezia',
+            'Empoli FC': 'Empoli',
+            'US Sassuolo Calcio': 'Sassuolo',
+            'US Cremonese': 'Cremonese',
+            'Pisa SC': 'Pisa',
+            'AC Monza': 'Monza'
+        });
+
+        function escapeHtml(value = '') {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getProfessionalTeamName(name = '') {
+            const normalized = String(name || '').replace(/\s+/g, ' ').trim();
+
+            if (!normalized) {
+                return '';
+            }
+
+            if (TEAM_NAME_SHORTCUTS[normalized]) {
+                return TEAM_NAME_SHORTCUTS[normalized];
+            }
+
+            const compactName = normalized
+                .replace(/^(?:AS|AC|FC|SS|SSC|US|ACF)\s+/i, '')
+                .replace(/(?:\s+(?:FC|CFC|BC|SC|SS|SSC|Calcio|Football Club|1909|1913|1907|1927))+$/gi, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            return compactName || normalized;
+        }
+
+        function getSeasonRange(season = currentSeason) {
+            const seasonStart = new Date(Date.UTC(season, 6, 1));
+            const seasonEnd = new Date(Date.UTC(season + 1, 6, 1));
+            const lastMatchday = new Date(Date.UTC(season + 1, 5, 30));
+
+            return {
+                startTimestamp: seasonStart.getTime(),
+                endTimestamp: seasonEnd.getTime(),
+                dateFrom: seasonStart.toISOString().slice(0, 10),
+                dateTo: lastMatchday.toISOString().slice(0, 10)
+            };
+        }
+
+        function formatSeasonLabel(season) {
+            const suffix = String((season + 1) % 100).padStart(2, '0');
+            return `${t('cagliari_season', 'Season').toUpperCase()} ${season} / ${suffix}`;
+        }
+
+        function updateSeasonDropdownUI() {
+            label.innerText = formatSeasonLabel(currentSeason);
+            options.forEach(opt => {
+                const value = parseInt(opt.getAttribute('data-value'), 10);
+                opt.innerText = formatSeasonLabel(value);
+                opt.classList.toggle('font-bold', value === currentSeason);
+                opt.classList.toggle('bg-white/5', value === currentSeason);
+                opt.classList.toggle('text-white', value === currentSeason);
+                opt.classList.toggle('text-white/70', value !== currentSeason);
+            });
+        }
+
+        function getUpcomingFixtures() {
+            return ALL_FIXTURES
+                .filter(f => UPCOMING_STATUSES.includes(f.fixture.status.short) || f.fixture.status.long === 'Not Started')
+                .sort((a, b) => a.fixture.timestamp - b.fixture.timestamp);
+        }
+
+        function getFinishedFixtures() {
+            return ALL_FIXTURES
+                .filter(f => FINISHED_STATUSES.includes(f.fixture.status.short) || f.fixture.status.long === 'Match Finished')
+                .sort((a, b) => b.fixture.timestamp - a.fixture.timestamp);
+        }
+
+        function getCalendarFixtures() {
+            return getUpcomingFixtures();
+        }
+
+        function getPositionMeta(position) {
+            if (position === 'Goalkeeper') return { key: 'cagliari_goalkeepers', fallback: 'Goalkeepers', icon: '🧤' };
+            if (position === 'Defender') return { key: 'cagliari_defenders', fallback: 'Defenders', icon: '🛡️' };
+            if (position === 'Attacker') return { key: 'cagliari_attackers', fallback: 'Attackers', icon: '🎯' };
+            return { key: 'cagliari_midfielders', fallback: 'Midfielders', icon: '⚙️' };
+        }
+
+        function mapFootballDataStatus(status) {
+            if (status === 'IN_PLAY') return { short: 'LIVE', long: 'In Play' };
+            if (status === 'PAUSED') return { short: 'HT', long: 'Paused' };
+            if (status === 'FINISHED') return { short: 'FT', long: 'Match Finished' };
+            if (status === 'TIMED' || status === 'SCHEDULED') return { short: 'NS', long: 'Not Started' };
+            if (status === 'POSTPONED') return { short: 'PST', long: 'Postponed' };
+            if (status === 'SUSPENDED') return { short: 'SUSP', long: 'Suspended' };
+            return { short: status || 'NS', long: status || 'Unknown' };
+        }
+
+        function adaptFootballDataMatches(data) {
+            if (!Array.isArray(data?.matches)) {
+                return [];
+            }
+
+            const { startTimestamp, endTimestamp } = getSeasonRange(currentSeason);
+
+            return data.matches
+                .map(match => {
+                    if (!match?.homeTeam || !match?.awayTeam || !match.utcDate) {
+                        return null;
+                    }
+
+                    const matchTimestamp = new Date(match.utcDate).getTime();
+
+                    if (Number.isNaN(matchTimestamp) || matchTimestamp < startTimestamp || matchTimestamp >= endTimestamp) {
+                        return null;
+                    }
+
+                    const status = mapFootballDataStatus(match.status);
+                    const score = match.score?.fullTime || {};
+
+                    return {
+                        fixture: {
+                            id: match.id,
+                            date: match.utcDate,
+                            timestamp: Math.floor(matchTimestamp / 1000),
+                            status: {
+                                short: status.short,
+                                long: status.long,
+                                elapsed: typeof match.minute === 'number' ? match.minute : null
+                            }
+                        },
+                        league: {
+                            name: match.competition?.name || 'Serie A'
+                        },
+                        teams: {
+                            home: {
+                                id: match.homeTeam.id,
+                                name: match.homeTeam.name,
+                                logo: match.homeTeam.crest || ''
+                            },
+                            away: {
+                                id: match.awayTeam.id,
+                                name: match.awayTeam.name,
+                                logo: match.awayTeam.crest || ''
+                            }
+                        },
+                        goals: {
+                            home: typeof score.home === 'number' ? score.home : 0,
+                            away: typeof score.away === 'number' ? score.away : 0
+                        }
+                    };
+                })
+                .filter(Boolean)
+                .sort((a, b) => a.fixture.timestamp - b.fixture.timestamp);
+        }
+
+        function adaptFootballDataStandings(data) {
+            const standingsGroup = Array.isArray(data?.standings)
+                ? (data.standings.find(group => group.type === 'TOTAL') || data.standings[0])
+                : null;
+            const table = Array.isArray(standingsGroup?.table) ? standingsGroup.table : [];
+
+            return table.map(row => ({
+                rank: row.position,
+                team: {
+                    id: row.team.id,
+                    name: row.team.shortName || row.team.name,
+                    logo: row.team.crest || ''
+                },
+                all: {
+                    played: row.playedGames,
+                    win: row.won,
+                    draw: row.draw,
+                    lose: row.lost,
+                    goals: {
+                        for: row.goalsFor,
+                        against: row.goalsAgainst
+                    }
+                },
+                points: row.points
+            }));
+        }
+
+        function normalizeApiSportsSquadPlayers(squadData) {
+            const rawPlayers = Array.isArray(squadData?.[0]?.players)
+                ? squadData[0].players
+                : (Array.isArray(squadData) ? squadData : []);
+
+            return rawPlayers
+                .map(entry => {
+                    const player = entry.player || entry;
+                    const fullName = player.name || [player.firstname, player.lastname].filter(Boolean).join(' ').trim();
+
+                    if (!fullName) {
+                        return null;
+                    }
+
+                    return {
+                        id: player.id ?? entry.id ?? null,
+                        fullName,
+                        number: entry.number ?? player.number ?? null,
+                        position: entry.position ?? player.position ?? 'Midfielder',
+                        photo: player.photo ?? entry.photo ?? ''
+                    };
+                })
+                .filter(Boolean);
+        }
+
+        function getFixturesSignature(fixtures) {
+            return JSON.stringify(
+                (fixtures || []).map(f => `${f.fixture.id}:${f.fixture.status.short}:${f.goals.home ?? ''}:${f.goals.away ?? ''}`)
+            );
+        }
+
+        async function refreshFixturesLiveState() {
+            if (currentSeason !== LATEST_SEASON) return;
+
+            const { dateFrom, dateTo } = getSeasonRange(currentSeason);
+            const fixturesData = await fetchFootballData(`/teams/${TEAM_ID}/matches?dateFrom=${dateFrom}&dateTo=${dateTo}`);
+            const freshFixtures = adaptFootballDataMatches(fixturesData);
+            if (!freshFixtures || freshFixtures.length === 0) return;
+            if (getFixturesSignature(freshFixtures) === getFixturesSignature(ALL_FIXTURES)) return;
+
+            ALL_FIXTURES = freshFixtures;
+            renderLiveAndNextMatch();
+            renderLatestMatches();
+            initCalendarUI();
+        }
+
+        async function refreshStandingsState() {
+            if (currentSeason !== LATEST_SEASON) return;
+
+            await loadStandings();
+        }
+
+        function manageFixturesRefresh() {
+            if (fixturesRefreshInterval) {
+                clearInterval(fixturesRefreshInterval);
+                fixturesRefreshInterval = null;
+            }
+
+            if (currentSeason !== LATEST_SEASON) return;
+
+            fixturesRefreshInterval = window.setInterval(refreshFixturesLiveState, 60000);
+        }
+
+        function manageStandingsRefresh() {
+            if (standingsRefreshInterval) {
+                clearInterval(standingsRefreshInterval);
+                standingsRefreshInterval = null;
+            }
+
+            if (currentSeason !== LATEST_SEASON) return;
+
+            standingsRefreshInterval = window.setInterval(refreshStandingsState, STANDINGS_REFRESH_INTERVAL);
+        }
+
+        // --- CUSTOM DROPDOWN LOGIC ---
+        const dropdown = document.getElementById('season-dropdown');
+        const trigger = document.getElementById('season-trigger');
+        const label = document.getElementById('current-season-label');
+        const options = document.querySelectorAll('.season-option');
+
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('active');
+            trigger.setAttribute('aria-expanded', dropdown.classList.contains('active') ? 'true' : 'false');
+        });
+
+        document.addEventListener('click', () => {
+            dropdown.classList.remove('active');
+            trigger.setAttribute('aria-expanded', 'false');
+        });
+
+        options.forEach(opt => {
+            opt.addEventListener('click', () => {
+                const val = parseInt(opt.getAttribute('data-value'), 10);
+                dropdown.classList.remove('active');
+                trigger.setAttribute('aria-expanded', 'false');
+
+                if (!AVAILABLE_SEASONS.includes(val)) return;
+
+                if (val === currentSeason) return;
+                
+                currentSeason = val;
+                updateSeasonDropdownUI();
+
+                refreshAllUI();
+            });
+        });
+
+        function createSkeletonBlock(className = '') {
+            return `
+                <div class="relative overflow-hidden rounded-2xl bg-white/5 ${className}">
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skeleton-shimmer"></div>
+                    <div class="w-full h-full animate-pulse bg-white/5"></div>
+                </div>
+            `;
+        }
+
+        function createStandingsSkeletonRows(count = 8) {
+            return Array.from({ length: count }, () => `
+                <tr class="border-b border-white/5">
+                    <td class="py-4 px-3">${createSkeletonBlock('h-4 w-8')}</td>
+                    <td class="py-4 px-3">
+                        <div class="flex items-center gap-4">
+                            ${createSkeletonBlock('h-8 w-8 rounded-full shrink-0')}
+                            ${createSkeletonBlock('h-4 flex-1 min-w-[120px]')}
+                        </div>
+                    </td>
+                    <td class="py-4 px-2">${createSkeletonBlock('h-4 w-8 mx-auto')}</td>
+                    <td class="py-4 px-2">${createSkeletonBlock('h-4 w-14 mx-auto')}</td>
+                    <td class="py-4 px-2">${createSkeletonBlock('h-4 w-16 mx-auto')}</td>
+                    <td class="py-4 px-2">${createSkeletonBlock('h-4 w-10 mx-auto')}</td>
+                </tr>
+            `).join('');
+        }
+
+        function createCalendarSkeletonCards(count = 4) {
+            return Array.from({ length: count }, () => `
+                <div class="relative flex items-center justify-between p-4 sm:p-5 rounded-2xl border border-white/5 bg-white/5 shadow-lg gap-4 overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skeleton-shimmer"></div>
+                    <div class="flex flex-col items-center w-[78px] sm:w-[22%] border-r border-white/10 pr-3 sm:pr-4 shrink-0 relative z-10 gap-2">
+                        ${createSkeletonBlock('h-7 w-10')}
+                        ${createSkeletonBlock('h-3 w-8')}
+                        ${createSkeletonBlock('h-3 w-12')}
+                    </div>
+                    <div class="flex items-center justify-between gap-2 sm:gap-4 flex-1 min-w-0 pl-1 sm:pl-4 relative z-10">
+                        <div class="flex flex-col items-center flex-1 gap-2 min-w-0">
+                            ${createSkeletonBlock('h-10 w-10 rounded-full')}
+                            ${createSkeletonBlock('h-4 w-full max-w-[120px]')}
+                        </div>
+                        ${createSkeletonBlock('h-4 w-10 shrink-0')}
+                        <div class="flex flex-col items-center flex-1 gap-2 min-w-0">
+                            ${createSkeletonBlock('h-10 w-10 rounded-full')}
+                            ${createSkeletonBlock('h-4 w-full max-w-[120px]')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function createLatestMatchSkeleton() {
+            return `
+                <div class="rounded-[28px] border border-white/10 bg-white/5 px-4 sm:px-5 py-4 sm:py-5 shadow-2xl overflow-hidden relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skeleton-shimmer"></div>
+                    <div class="relative z-10 flex flex-col gap-5">
+                        <div class="flex items-center justify-between gap-4">
+                            ${createSkeletonBlock('h-4 w-32')}
+                            ${createSkeletonBlock('h-7 w-20 rounded-full')}
+                        </div>
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex flex-col items-center flex-1 gap-3 min-w-0">
+                                ${createSkeletonBlock('h-14 w-14 rounded-full')}
+                                ${createSkeletonBlock('h-4 w-full max-w-[130px]')}
+                            </div>
+                            ${createSkeletonBlock('h-12 w-24 rounded-2xl shrink-0')}
+                            <div class="flex flex-col items-center flex-1 gap-3 min-w-0">
+                                ${createSkeletonBlock('h-14 w-14 rounded-full')}
+                                ${createSkeletonBlock('h-4 w-full max-w-[130px]')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createLiveMatchSkeleton() {
+            return `
+                <div class="w-full flex flex-col items-center gap-8 pb-4 pt-2 overflow-hidden relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skeleton-shimmer"></div>
+                    ${createSkeletonBlock('h-10 w-[260px] rounded-full')}
+                    <div class="match-live-layout flex items-center justify-between w-full max-w-5xl mx-auto gap-8 lg:gap-8 relative z-10">
+                        <div class="match-card-panel flex flex-col items-center flex-1 gap-5 w-full">
+                            ${createSkeletonBlock('h-24 w-24 sm:h-28 sm:w-28 md:h-40 md:w-40 rounded-full')}
+                            ${createSkeletonBlock('h-5 w-full max-w-[180px]')}
+                        </div>
+                        ${createSkeletonBlock('h-20 w-[140px] sm:w-[180px] md:w-[220px] rounded-[32px] shrink-0')}
+                        <div class="match-card-panel flex flex-col items-center flex-1 gap-5 w-full">
+                            ${createSkeletonBlock('h-24 w-24 sm:h-28 sm:w-28 md:h-40 md:w-40 rounded-full')}
+                            ${createSkeletonBlock('h-5 w-full max-w-[180px]')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createSquadSkeletonCards(count = 8) {
+            return `
+                <div class="w-full grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    ${Array.from({ length: count }, () => `
+                        <div class="relative overflow-hidden rounded-2xl border border-white/5 bg-white/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skeleton-shimmer"></div>
+                            <div class="relative z-10 flex items-center gap-4 sm:gap-6 w-full min-w-0">
+                                ${createSkeletonBlock('h-16 w-16 rounded-full shrink-0')}
+                                <div class="flex flex-col gap-3 flex-1 min-w-0">
+                                    ${createSkeletonBlock('h-4 w-full max-w-[180px]')}
+                                    ${createSkeletonBlock('h-3 w-full max-w-[120px]')}
+                                </div>
+                            </div>
+                            ${createSkeletonBlock('relative z-10 h-12 w-16 rounded-2xl shrink-0')}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function refreshAllUI() {
             // Pokaż loadery
+            updateSeasonDropdownUI();
+            manageFixturesRefresh();
+            manageStandingsRefresh();
             document.getElementById('standings-loader').style.display = 'block';
             document.getElementById('calendar-loader').style.display = 'block';
             document.getElementById('squad-loader').style.display = 'block';
             
-            // Wyczyść stare dane z UI
-            document.getElementById('standings-body').innerHTML = '';
-            document.getElementById('calendar-matches').innerHTML = '';
-            document.getElementById('last-match-highlight').innerHTML = '<p class="text-white/40 text-sm">Ładowanie...</p>';
-            document.getElementById('live-match-full').innerHTML = '';
-            document.getElementById('squad-container').innerHTML = '';
+            // Wyczyść stare dane
+            document.getElementById('standings-body').innerHTML = createStandingsSkeletonRows();
+            document.getElementById('calendar-matches').innerHTML = createCalendarSkeletonCards();
+            document.getElementById('latest-matches-highlight').innerHTML = createLatestMatchSkeleton();
+            document.getElementById('live-match-full').innerHTML = createLiveMatchSkeleton();
+            document.getElementById('squad-container').innerHTML = createSquadSkeletonCards();
             document.getElementById('standings-error').classList.add('hidden');
 
-            // Odśwież z wymuszonym pobraniem z pominięciem cache dla nowych sezonów
-            loadAllData(true);
-        });
+            loadAllData();
+        }
 
-        async function loadAllData(forceRefresh = false) {
+        async function loadAllData() {
             await Promise.allSettled([
-                loadStandings(forceRefresh),
-                loadFixtures(forceRefresh),
-                loadSquad(forceRefresh)
+                loadStandings(),
+                loadFixtures(),
+                loadSquad()
             ]);
         }
 
-        async function loadStandings(forceRefresh = false) {
-            const data = await fetchWithCache(`/standings?season=${currentSeason}&league=${LEAGUE_ID}`, forceRefresh);
+        async function loadStandings() {
+            const data = await fetchFootballData(`/competitions/${LEAGUE_CODE}/standings?season=${currentSeason}`);
+            const standings = adaptFootballDataStandings(data);
             const tbody = document.getElementById('standings-body');
             document.getElementById('standings-loader').style.display = 'none';
 
-            if (!data || !data[0] || !data[0].league.standings[0]) {
+            if (!standings.length) {
                 document.getElementById('standings-error').classList.remove('hidden');
-                document.getElementById('standings-error').innerHTML = `Brak danych dla sezonu ${currentSeason}. (Możliwy błąd planu API lub brak danych).`;
+                document.getElementById('standings-error').innerHTML = `<div class="p-6 bg-red-900/10 rounded-xl border border-red-900/20 text-red-500/80"><span data-i18n="cagliari_no_standings">${t('cagliari_no_standings', 'No standings data for season')}</span> ${currentSeason}.</div>`;
+                if(window.applyCagliariTranslations) window.applyCagliariTranslations();
+                manageStandingsRefresh();
                 return;
             }
 
-            const standings = data[0].league.standings[0];
+            document.getElementById('standings-error').classList.add('hidden');
             let html = '';
             
             standings.forEach(row => {
@@ -271,340 +875,448 @@
                 const rowClass = isCagliari ? 'cagliari-row' : 'hover:bg-white/5 transition-colors border-l-4 border-transparent';
                 html += `
                     <tr class="${rowClass}">
-                        <td class="py-3 px-3 text-white/70 ${isCagliari ? 'font-bold !text-white' : ''}">${row.rank}</td>
-                        <td class="py-3 px-3 flex items-center gap-3">
-                            <img src="${row.team.logo}" alt="${row.team.name}" class="w-6 h-6 object-contain">
+                        <td class="py-4 px-3 text-white/70 ${isCagliari ? 'font-bold !text-white' : ''}">${row.rank}</td>
+                        <td class="py-4 px-3 flex items-center gap-4">
+                            <img src="${row.team.logo}" alt="${row.team.name}" class="w-8 h-8 object-contain">
                             <span class="${isCagliari ? 'font-bold text-white' : 'font-medium'}">${row.team.name}</span>
                         </td>
-                        <td class="py-3 px-2 text-center text-white/50">${row.all.played}</td>
-                        <td class="py-3 px-2 text-center text-white/60">${row.all.win}-${row.all.draw}-${row.all.lose}</td>
-                        <td class="py-3 px-2 text-center text-white/50 tracking-wider">${row.all.goals.for}:${row.all.goals.against}</td>
-                        <td class="py-3 px-2 text-center font-bold ${isCagliari ? 'text-white' : 'text-crimson'} text-[15px]">${row.points}</td>
+                        <td class="py-4 px-2 text-center text-white/50 font-mono">${row.all.played}</td>
+                        <td class="py-4 px-2 text-center text-white/60 font-mono text-xs">${row.all.win}-${row.all.draw}-${row.all.lose}</td>
+                        <td class="py-4 px-2 text-center text-white/50 tracking-wider font-mono text-xs">${row.all.goals.for}:${row.all.goals.against}</td>
+                        <td class="py-4 px-2 text-center font-bold ${isCagliari ? 'text-white' : 'text-crimson'} text-[16px] font-mono">${row.points}</td>
                     </tr>
                 `;
             });
             tbody.innerHTML = html;
+            manageStandingsRefresh();
         }
 
-        async function loadFixtures(forceRefresh = false) {
-            ALL_FIXTURES = await fetchWithCache(`/fixtures?team=${TEAM_ID}&season=${currentSeason}`, forceRefresh);
+        async function loadFixtures() {
+            const { dateFrom, dateTo } = getSeasonRange(currentSeason);
+            const data = await fetchFootballData(`/teams/${TEAM_ID}/matches?dateFrom=${dateFrom}&dateTo=${dateTo}`);
+            ALL_FIXTURES = adaptFootballDataMatches(data);
             document.getElementById('calendar-loader').style.display = 'none';
 
             if (!ALL_FIXTURES || ALL_FIXTURES.length === 0) {
-                document.getElementById('last-match-highlight').innerHTML = `<p class="text-white/40 text-sm">Błąd API (Brak danych widocznych dla tego sezonu)</p>`;
-                document.getElementById('live-match-full').innerHTML = `<p class="text-center text-white/40 text-lg font-light tracking-wide py-8"><span data-i18n="cagliari_no_upcoming">Brak dostępnych meczów dla sezonu</span> ${currentSeason}.</p>`;
-                document.getElementById('calendar-matches').innerHTML = `<p class="text-center text-white/40 text-sm mt-4">Brak terminarza.</p>`;
+                const seasonLabel = `${currentSeason}/${String((currentSeason + 1) % 100).padStart(2, '0')}`;
+                document.getElementById('live-pulse-bg').classList.add('hidden');
+                document.getElementById('latest-matches-highlight').innerHTML = `<p class="text-white/40 text-sm" data-i18n="cagliari_no_played_matches">${t('cagliari_no_played_matches', 'No finished matches yet.')}</p>`;
+                document.getElementById('live-match-full').innerHTML = `<p class="text-center text-white/40 text-lg font-light tracking-wide py-8"><span data-i18n="cagliari_no_fixtures_season">${t('cagliari_no_fixtures_season', 'No matches available for the season')}</span> ${seasonLabel}.</p>`;
+                document.getElementById('calendar-matches').innerHTML = `<p class="text-center text-white/40 text-sm mt-4" data-i18n="cagliari_no_schedule">${t('cagliari_no_schedule', 'No schedule available.')}</p>`;
+                if(window.applyCagliariTranslations) window.applyCagliariTranslations();
+                manageFixturesRefresh();
                 return;
             }
 
+            manageFixturesRefresh();
             initCalendarUI();
             renderLiveAndNextMatch();
-            renderLastMatch();
+            renderLatestMatches();
         }
 
-        function renderLastMatch() {
-            // OSTATNI MECZ: DOKŁADNIE JEDEN, ABSOLUTNIE NAJNOWSZY ZAKOŃCZONY MECZ
-            const finished = ALL_FIXTURES.filter(f => ['FT', 'AET', 'PEN', 'Match Finished'].includes(f.fixture.status.short) || f.fixture.status.long === 'Match Finished')
-                            .sort((a,b) => b.fixture.timestamp - a.fixture.timestamp);
-            const container = document.getElementById('last-match-highlight');
-            if(finished.length > 0) {
-                const f = finished[0];
-                const date = new Date(f.fixture.date).toLocaleDateString('pl-PL', { day:'2-digit', month:'2-digit', year:'numeric' });
-                container.innerHTML = `
-                    <div class="text-[10px] sm:text-xs text-white/50 mb-7 tracking-widest uppercase text-center w-full">${date} &bull; ${f.league.name}</div>
-                    <div class="flex items-center justify-between w-full max-w-sm mx-auto">
-                        <div class="flex flex-col items-center flex-1">
-                            <img src="${f.teams.home.logo}" class="w-16 h-16 sm:w-20 sm:h-20 mb-3 object-contain drop-shadow-lg scale-110" alt="Home">
-                            <span class="text-sm font-bold text-center text-white/90 tracking-wide uppercase truncate w-full px-2" title="${f.teams.home.name}">${f.teams.home.name.substring(0,3)}</span>
-                        </div>
-                        <div class="text-5xl sm:text-6xl px-4 py-2 font-heading font-black text-white tracking-widest drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">${f.goals.home} - ${f.goals.away}</div>
-                        <div class="flex flex-col items-center flex-1">
-                            <img src="${f.teams.away.logo}" class="w-16 h-16 sm:w-20 sm:h-20 mb-3 object-contain drop-shadow-lg scale-110" alt="Away">
-                            <span class="text-sm font-bold text-center text-white/90 tracking-wide uppercase truncate w-full px-2" title="${f.teams.away.name}">${f.teams.away.name.substring(0,3)}</span>
-                        </div>
-                    </div>
-                `;
-            } else {
-                container.innerHTML = `<p class="text-white/40 text-sm">Brak rozegranych meczów w tym sezonie.</p>`;
-            }
-        }
+        function renderLatestMatches() {
+            const currentLocale = getCurrentLocale();
+            const latestMatch = getFinishedFixtures()[0];
+            const container = document.getElementById('latest-matches-highlight');
 
-        function renderLiveAndNextMatch() {
-            const liveStatuses = ['1H', '2H', 'HT', 'ET', 'BT', 'P', 'SUSP', 'INT', 'LIVE'];
-            const liveMatches = ALL_FIXTURES.filter(f => liveStatuses.includes(f.fixture.status.short));
-            const container = document.getElementById('live-match-full');
-            
-            if (liveMatches.length === 0) {
-                document.getElementById('live-pulse-bg').classList.add('hidden');
-                
-                // ZNALEŹĆ PIERWSZY NASTĘPNY MECZ (Not Started / NS / TBD)
-                const upcoming = ALL_FIXTURES.filter(f => ['TBD', 'NS', 'Not Started'].includes(f.fixture.status.short) || f.fixture.status.long === 'Not Started')
-                                .sort((a,b) => a.fixture.timestamp - b.fixture.timestamp);
-                
-                let nextMatchHtml = '';
-                if(upcoming.length > 0) {
-                    const next = upcoming[0];
-                    const date = new Date(next.fixture.date);
-                    const dStr = date.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                    const tStr = date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
-                    
-                    const isOpponentHome = next.teams.home.id !== TEAM_ID;
-                    const opponent = isOpponentHome ? next.teams.home : next.teams.away;
-
-                    nextMatchHtml = `
-                        <div class="mt-8 flex flex-col items-center w-full max-w-xl mx-auto border border-white/10 bg-black/40 p-6 rounded-2xl shadow-xl z-10 relative">
-                            <h3 class="text-white/80 font-heading text-2xl tracking-widest uppercase mb-6 flex items-center gap-3">
-                                <span class="w-2 h-2 bg-crimson rounded-full"></span> NAJBLIŻSZY MECZ
-                            </h3>
-                            <div class="flex items-center justify-between w-full">
-                                <div class="flex flex-col flex-1 items-start justify-center">
-                                    <span class="text-white/50 text-[10px] uppercase tracking-widest mb-1">${next.league.name}</span>
-                                    <span class="text-white font-heading text-3xl md:text-4xl tracking-wide">${dStr}</span>
-                                    <span class="text-crimson font-bold text-lg md:text-xl tracking-widest mt-1">${tStr}</span>
-                                </div>
-                                
-                                <div class="text-white/20 text-4xl px-4 italic font-light">vs</div>
-                                
-                                <div class="flex flex-col flex-1 items-end justify-center text-right">
-                                    <img src="${opponent.logo}" class="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] mb-2">
-                                    <span class="text-white/90 font-bold uppercase tracking-wider text-sm md:text-base">${opponent.name}</span>
-                                    <span class="text-white/40 text-[10px] uppercase tracking-widest mt-1">${isOpponentHome ? 'WYJAZD' : 'DOM'}</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                container.innerHTML = `
-                    <div class="flex items-center justify-between w-full border-b border-white/10 pb-4 mb-4">
-                        <h3 class="text-3xl md:text-4xl font-heading text-white tracking-widest uppercase flex items-center justify-center gap-4 w-full opacity-50">
-                            <span class="w-3 h-3 bg-white/20 rounded-full"></span> 
-                            <span data-i18n="cagliari_live_match">Mecz na żywo</span>
-                        </h3>
-                    </div>
-                    <p class="text-center text-white/50 text-xl font-light tracking-wide py-4" data-i18n="cagliari_no_live_match">Aktualnie Cagliari nie rozgrywa żadnego spotkania.</p>
-                    ${nextMatchHtml}
-                `;
+            if (!latestMatch) {
+                container.innerHTML = `<p class="text-white/40 text-sm" data-i18n="cagliari_no_played_matches">${t('cagliari_no_played_matches', 'No finished matches yet.')}</p>`;
+                if(window.applyCagliariTranslations) window.applyCagliariTranslations();
                 return;
             }
 
-            // JEST MECZ NA ZYWO
-            const live = liveMatches[0];
-            document.getElementById('live-pulse-bg').classList.remove('hidden');
+            const date = new Date(latestMatch.fixture.date).toLocaleDateString(currentLocale, { day:'2-digit', month:'2-digit', year:'numeric' });
+            const isCagliariHome = latestMatch.teams.home.id === TEAM_ID;
+            const homeFullName = escapeHtml(latestMatch.teams.home.name);
+            const awayFullName = escapeHtml(latestMatch.teams.away.name);
+            const homeDesktopName = escapeHtml(getProfessionalTeamName(latestMatch.teams.home.name));
+            const awayDesktopName = escapeHtml(getProfessionalTeamName(latestMatch.teams.away.name));
 
             container.innerHTML = `
-                <div class="flex items-center justify-between w-full border-b border-white/10 pb-4 mb-8">
-                    <h3 class="text-3xl md:text-4xl font-heading text-white tracking-widest uppercase flex items-center justify-center gap-4 w-full">
-                        <span class="w-3 h-3 bg-crimson rounded-full animate-pulse shadow-[0_0_10px_rgba(200,16,46,1)]"></span> 
-                        <span data-i18n="cagliari_live_match">Mecz na żywo</span>
-                    </h3>
-                </div>
-                
-                <div class="flex flex-col items-center w-full px-4 sm:px-10">
-                    <div class="bg-crimson/20 border border-crimson/50 text-white text-xs font-bold px-4 py-1.5 rounded-full mb-6 relative overflow-hidden group">
-                        <span class="relative z-10 flex items-center gap-2">MINUTA: ${live.fixture.status.elapsed}'</span>
-                        <div class="absolute inset-0 bg-crimson/40 -translate-x-full group-hover:animate-[slideRight_1.5s_infinite]"></div>
+                <div class="rounded-[28px] border border-white/10 bg-white/5 px-4 sm:px-5 py-4 sm:py-5 shadow-2xl">
+                    <div class="flex flex-col sm:flex-row items-start justify-between gap-4 mb-6">
+                        <div class="space-y-2">
+                            <p class="text-[10px] text-white/40 tracking-[0.22em] uppercase font-bold">${date}</p>
+                            <p class="text-[10px] text-crimson/80 tracking-[0.18em] uppercase font-bold">${latestMatch.league.name}</p>
+                        </div>
+                        <span class="inline-flex items-center rounded-full border border-white/10 bg-black/30 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">${t(isCagliariHome ? 'cagliari_home' : 'cagliari_away', isCagliariHome ? 'Home' : 'Away')}</span>
                     </div>
-                    <div class="flex items-center justify-between w-full max-w-4xl mx-auto">
-                        <div class="flex flex-col items-center flex-1 text-center">
-                            <img src="${live.teams.home.logo}" class="relative w-20 h-20 md:w-32 md:h-32 mb-4 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
-                            <h4 class="font-heading text-2xl md:text-4xl text-white tracking-wider">${live.teams.home.name}</h4>
+                    <div class="flex items-center justify-between gap-2 sm:gap-3">
+                        <div class="flex flex-col items-center flex-1 gap-3 min-w-0">
+                            <img src="${latestMatch.teams.home.logo}" class="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xl" alt="${homeFullName}">
+                            <span class="block lg:hidden text-[10px] sm:text-[11px] font-bold text-center text-white/80 tracking-[0.14em] sm:tracking-[0.18em] uppercase leading-tight whitespace-normal break-words w-full px-1" title="${homeFullName}">${homeFullName}</span>
+                            <span class="hidden lg:block text-[11px] font-bold text-center text-white/80 tracking-[0.16em] uppercase leading-none whitespace-nowrap truncate max-w-full w-full px-2" title="${homeFullName}">${homeDesktopName}</span>
                         </div>
-                        <div class="flex flex-col items-center flex-[0.5] shrink-0 text-center px-4 md:px-8">
-                            <p class="text-white/40 text-[10px] sm:text-xs uppercase tracking-widest mb-2">${live.league.name}</p>
-                            <div class="flex items-center gap-4 md:gap-8 bg-black/30 px-6 py-4 rounded-3xl border border-white/10 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
-                                <span class="text-5xl md:text-7xl font-heading text-crimson drop-shadow-[0_0_15px_rgba(200,16,46,0.6)]">${live.goals.home ?? 0}</span>
-                                <span class="text-3xl md:text-5xl font-heading text-white/20">:</span>
-                                <span class="text-5xl md:text-7xl font-heading text-crimson drop-shadow-[0_0_15px_rgba(200,16,46,0.6)]">${live.goals.away ?? 0}</span>
-                            </div>
-                        </div>
-                        <div class="flex flex-col items-center flex-1 text-center">
-                            <img src="${live.teams.away.logo}" class="relative w-20 h-20 md:w-32 md:h-32 mb-4 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
-                            <h4 class="font-heading text-2xl md:text-4xl text-white tracking-wider">${live.teams.away.name}</h4>
+                        <div class="text-2xl sm:text-4xl font-heading font-black text-white tracking-[0.18em] sm:tracking-widest drop-shadow-[0_0_20px_rgba(255,255,255,0.12)] bg-black/40 px-3 sm:px-5 py-2 rounded-2xl border border-white/5 shrink-0">${latestMatch.goals.home} - ${latestMatch.goals.away}</div>
+                        <div class="flex flex-col items-center flex-1 gap-3 min-w-0">
+                            <img src="${latestMatch.teams.away.logo}" class="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xl" alt="${awayFullName}">
+                            <span class="block lg:hidden text-[10px] sm:text-[11px] font-bold text-center text-white/80 tracking-[0.14em] sm:tracking-[0.18em] uppercase leading-tight whitespace-normal break-words w-full px-1" title="${awayFullName}">${awayFullName}</span>
+                            <span class="hidden lg:block text-[11px] font-bold text-center text-white/80 tracking-[0.16em] uppercase leading-none whitespace-nowrap truncate max-w-full w-full px-2" title="${awayFullName}">${awayDesktopName}</span>
                         </div>
                     </div>
                 </div>
             `;
         }
 
+        function renderNextMatchCard(nextFixture, currentLocale) {
+            if (!nextFixture) {
+                return `<p class="text-center text-white/35 text-sm tracking-[0.22em] uppercase" data-i18n="cagliari_no_upcoming">${t('cagliari_no_upcoming', 'No upcoming matches available.')}</p>`;
+            }
+
+            const date = new Date(nextFixture.fixture.date);
+            const dateText = date.toLocaleDateString(currentLocale, { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const timeText = date.toLocaleTimeString(currentLocale, { hour: '2-digit', minute: '2-digit' });
+            const isOpponentHome = nextFixture.teams.home.id !== TEAM_ID;
+            const opponent = isOpponentHome ? nextFixture.teams.home : nextFixture.teams.away;
+
+            return `
+                <div class="flex flex-col items-center w-full max-w-3xl mx-auto border border-white/10 bg-white/5 p-5 sm:p-8 rounded-[32px] shadow-2xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-crimson/10 rounded-full blur-3xl -z-10 group-hover:bg-crimson/20 transition-all duration-700"></div>
+                    <h3 class="text-white/40 font-bold text-xs tracking-[0.3em] sm:tracking-[0.4em] uppercase mb-6 sm:mb-8 flex items-center gap-4 text-center">
+                        <span class="w-1.5 h-1.5 bg-crimson rounded-full shadow-[0_0_10px_#c8102e]"></span>
+                        <span data-i18n="cagliari_next_match">${t('cagliari_next_match', 'Next Match')}</span>
+                    </h3>
+                    <div class="match-next-layout flex items-center justify-between w-full gap-6 lg:gap-8">
+                        <div class="match-card-side flex flex-col flex-1 items-center lg:items-start justify-center text-center lg:text-left">
+                            <span class="text-white/30 text-[10px] uppercase tracking-[0.2em] mb-2 font-bold">${nextFixture.league.name}</span>
+                            <span class="match-next-date text-white font-heading text-4xl md:text-5xl tracking-wide leading-none">${dateText}</span>
+                            <span class="text-crimson font-black text-xl md:text-2xl tracking-[0.1em] mt-2">${timeText}</span>
+                        </div>
+                        <div class="hidden lg:block text-white/5 text-6xl italic font-black select-none">VS</div>
+                        <div class="match-card-side match-card-side--away flex flex-col flex-1 items-center lg:items-end justify-center text-center lg:text-right">
+                            <div class="bg-white/5 p-3 sm:p-4 rounded-2xl border border-white/10 mb-4 group-hover:scale-110 transition-transform duration-500">
+                                <img src="${opponent.logo}" class="w-14 h-14 md:w-20 md:h-20 object-contain drop-shadow-2xl" alt="${opponent.name}">
+                            </div>
+                            <span class="match-next-opponent text-white font-heading text-2xl md:text-3xl tracking-wider uppercase break-words">${opponent.name}</span>
+                            <span class="text-white/30 text-[10px] uppercase tracking-[0.2em] mt-2 font-bold">${t(isOpponentHome ? 'cagliari_away' : 'cagliari_home', isOpponentHome ? 'Away' : 'Home')}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderLiveAndNextMatch() {
+            const liveMatches = ALL_FIXTURES.filter(f => LIVE_STATUSES.includes(f.fixture.status.short));
+            const container = document.getElementById('live-match-full');
+            const currentLocale = getCurrentLocale();
+            const nextFixture = getUpcomingFixtures()[0];
+
+            if (liveMatches.length === 0) {
+                document.getElementById('live-pulse-bg').classList.add('hidden');
+                container.innerHTML = `
+                    <div class="flex items-center justify-between w-full border-b border-white/10 pb-6 mb-8">
+                        <h3 class="match-live-heading text-3xl sm:text-4xl md:text-5xl font-heading text-white tracking-[0.2em] uppercase flex items-center justify-center gap-4 sm:gap-6 w-full opacity-60 text-center">
+                            <span class="w-3 h-3 bg-white/40 rounded-full"></span> 
+                            <span data-i18n="cagliari_live_score">${t('cagliari_live_score', 'Live Score')}</span>
+                        </h3>
+                    </div>
+                    <div class="w-full flex flex-col items-center gap-6 sm:gap-8">
+                        <p class="text-center text-white/40 text-base sm:text-xl font-light tracking-[0.24em] sm:tracking-widest py-2 uppercase" data-i18n="cagliari_no_live_match">Aktualnie brak meczu.</p>
+                        <div class="w-full border-t border-white/10 pt-8">
+                            ${renderNextMatchCard(nextFixture, currentLocale)}
+                        </div>
+                    </div>
+                `;
+                if(window.applyCagliariTranslations) window.applyCagliariTranslations();
+                return;
+            }
+
+            const live = liveMatches[0];
+            const liveStatusText = typeof live.fixture.status.elapsed === 'number'
+                ? `${t('cagliari_live_minute', 'Minute')}: ${live.fixture.status.elapsed}'`
+                : t(live.fixture.status.short === 'HT' ? 'cagliari_live_paused' : 'cagliari_live_match', live.fixture.status.short === 'HT' ? 'Paused' : 'Live Match');
+            document.getElementById('live-pulse-bg').classList.remove('hidden');
+            container.innerHTML = `
+                <div class="flex items-center justify-between w-full border-b border-white/10 pb-6 mb-12">
+                    <h3 class="match-live-heading text-3xl sm:text-4xl md:text-5xl font-heading text-white tracking-[0.2em] uppercase flex items-center justify-center gap-4 sm:gap-6 w-full text-center">
+                        <span class="w-3 h-3 bg-crimson rounded-full animate-pulse shadow-[0_0_15px_rgba(200,16,46,1)]"></span> 
+                        <span data-i18n="cagliari_live_score">${t('cagliari_live_score', 'Live Score')}</span>
+                    </h3>
+                </div>
+                <div class="flex flex-col items-center w-full px-4 sm:px-10 gap-10">
+                    <div class="bg-crimson/20 border border-crimson/50 text-white text-xs font-bold px-6 py-2 rounded-full shadow-[0_0_20px_rgba(200,16,46,0.3)] tracking-widest">
+                        ${liveStatusText}
+                    </div>
+                    <div class="match-live-layout flex items-center justify-between w-full max-w-5xl mx-auto gap-8 lg:gap-8">
+                        <div class="match-card-panel flex flex-col items-center flex-1 text-center group w-full">
+                            <img src="${live.teams.home.logo}" class="w-20 h-20 sm:w-24 sm:h-24 md:w-40 md:h-40 mb-5 sm:mb-6 object-contain drop-shadow-2xl group-hover:scale-110 transition-transform duration-500" alt="${live.teams.home.name}">
+                            <h4 class="match-live-team-title font-heading text-2xl sm:text-3xl md:text-5xl text-white tracking-[0.14em] md:tracking-widest uppercase break-words">${live.teams.home.name}</h4>
+                        </div>
+                        <div class="match-score-shell flex flex-col items-center shrink-0 text-center px-2 md:px-12">
+                            <p class="text-white/30 text-[10px] uppercase tracking-[0.3em] font-bold mb-4">${live.league.name}</p>
+                            <div class="flex items-center justify-center gap-4 sm:gap-6 md:gap-10 bg-black/40 px-6 sm:px-8 md:px-10 py-4 sm:py-6 rounded-[32px] sm:rounded-[40px] border border-white/10 shadow-2xl backdrop-blur-3xl w-full">
+                                <span class="match-score-text text-6xl sm:text-7xl md:text-9xl font-heading text-crimson drop-shadow-[0_0_30px_rgba(200,16,46,0.8)] leading-none">${live.goals.home ?? 0}</span>
+                                <span class="text-3xl sm:text-4xl md:text-6xl font-heading text-white/10 leading-none pb-2">:</span>
+                                <span class="match-score-text text-6xl sm:text-7xl md:text-9xl font-heading text-crimson drop-shadow-[0_0_30px_rgba(200,16,46,0.8)] leading-none">${live.goals.away ?? 0}</span>
+                            </div>
+                        </div>
+                        <div class="match-card-panel flex flex-col items-center flex-1 text-center group w-full">
+                            <img src="${live.teams.away.logo}" class="w-20 h-20 sm:w-24 sm:h-24 md:w-40 md:h-40 mb-5 sm:mb-6 object-contain drop-shadow-2xl group-hover:scale-110 transition-transform duration-500" alt="${live.teams.away.name}">
+                            <h4 class="match-live-team-title font-heading text-2xl sm:text-3xl md:text-5xl text-white tracking-[0.14em] md:tracking-widest uppercase break-words">${live.teams.away.name}</h4>
+                        </div>
+                    </div>
+                </div>
+            `;
+            if(window.applyCagliariTranslations) window.applyCagliariTranslations();
+        }
+
         function initCalendarUI() {
+            const calendarFixtures = getCalendarFixtures();
             let monthsToRender = new Set();
-            ALL_FIXTURES.forEach(f => monthsToRender.add(new Date(f.fixture.date).getMonth()));
+            calendarFixtures.forEach(f => monthsToRender.add(new Date(f.fixture.date).getMonth()));
             let monArr = Array.from(monthsToRender).sort((a,b) => a-b);
             
             const container = document.getElementById('cal-months');
             let html = '';
             monArr.forEach(m => {
-                html += `<button onclick="changeMonth(${m})" id="btn-month-${m}" class="px-3 py-1.5 rounded-md text-xs font-bold transition-all shrink-0 bg-white/5 text-white/50 hover:bg-white/10 hover:text-white">${MONTHS_PL_SHORT[m]}</button>`;
+                html += `<button onclick="changeMonth(${m})" id="btn-month-${m}" class="px-6 py-2.5 rounded-xl text-[10px] font-black tracking-widest transition-all shrink-0 bg-white/5 text-white/30 hover:bg-white/10 hover:text-white uppercase" data-i18n-month="${m}" data-i18n-short></button>`;
             });
             container.innerHTML = html;
+
+            if (calendarFixtures.length === 0 || monArr.length === 0) {
+                window.activeCalendarMonth = null;
+                document.getElementById('calendar-matches').innerHTML = `<p class="text-center text-white/40 text-sm mt-4" data-i18n="cagliari_no_schedule">${t('cagliari_no_schedule', 'No schedule available.')}</p>`;
+                document.getElementById('cal-prev').onclick = null;
+                document.getElementById('cal-next').onclick = null;
+                if(window.applyCagliariTranslations) window.applyCagliariTranslations();
+                return;
+            }
             
             const currM = new Date().getMonth();
-            const activeM = monArr.includes(currM) ? currM : (monArr.length > 0 ? monArr[0] : 0);
+            const activeM = typeof window.activeCalendarMonth === 'number' && monArr.includes(window.activeCalendarMonth)
+                ? window.activeCalendarMonth
+                : (monArr.includes(currM) ? currM : (monArr.length > 0 ? monArr[0] : 0));
+            
+            // Arrows logic
+            document.getElementById('cal-prev').onclick = () => {
+                const idx = monArr.indexOf(window.activeCalendarMonth);
+                if(idx > 0) changeMonth(monArr[idx-1]);
+            };
+            document.getElementById('cal-next').onclick = () => {
+                const idx = monArr.indexOf(window.activeCalendarMonth);
+                if(idx < monArr.length - 1) changeMonth(monArr[idx+1]);
+            };
+
             if(monArr.length > 0) changeMonth(activeM);
+            if(window.applyCagliariTranslations) window.applyCagliariTranslations();
         }
 
         window.changeMonth = function(month) {
+            window.activeCalendarMonth = month;
             document.querySelectorAll('#cal-months button').forEach(b => {
-                b.classList.remove('bg-crimson', 'text-white', 'shadow-[0_0_10px_rgba(200,16,46,0.6)]');
-                b.classList.add('bg-white/5', 'text-white/50');
+                b.classList.remove('bg-crimson', 'text-white', 'shadow-[0_0_15px_rgba(200,16,46,0.4)]', 'scale-110');
+                b.classList.add('bg-white/5', 'text-white/30');
             });
             const btn = document.getElementById(`btn-month-${month}`);
             if(btn) {
-                btn.classList.add('bg-crimson', 'text-white', 'shadow-[0_0_10px_rgba(200,16,46,0.6)]');
-                btn.classList.remove('bg-white/5', 'text-white/50');
+                btn.classList.add('bg-crimson', 'text-white', 'shadow-[0_0_15px_rgba(200,16,46,0.4)]', 'scale-110');
+                btn.classList.remove('bg-white/5', 'text-white/30');
+                btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             }
 
             const container = document.getElementById('calendar-matches');
-            const todayStr = new Date().toISOString().split('T')[0];
+            const currentLocale = getCurrentLocale();
 
-            const matchesInMonth = ALL_FIXTURES.filter(f => new Date(f.fixture.date).getMonth() === month).sort((a,b) => a.fixture.timestamp - b.fixture.timestamp);
+            const calendarFixtures = getCalendarFixtures();
+            const matchesInMonth = calendarFixtures.filter(f => new Date(f.fixture.date).getMonth() === month).sort((a,b) => a.fixture.timestamp - b.fixture.timestamp);
 
             if(matchesInMonth.length === 0){
-                container.innerHTML = `<p class="text-center text-white/40 mt-4">Brak spotkań w tym miesiącu.</p>`;
+                container.innerHTML = `<p class="text-center text-white/40 mt-12 py-8 italic font-light tracking-widest uppercase">${t('cagliari_no_matches_in_month', 'No matches.')}</p>`;
                 return;
             }
             
             let html = '';
             matchesInMonth.forEach(f => {
-                const matchDate = new Date(f.fixture.date);
-                const isToday = matchDate.toISOString().split('T')[0] === todayStr;
-                const isLive = ['1H', '2H', 'HT', 'ET', 'BT', 'P', 'SUSP', 'INT', 'LIVE'].includes(f.fixture.status.short);
-                const isFinished = ['FT', 'AET', 'PEN', 'Match Finished'].includes(f.fixture.status.short) || f.fixture.status.long === 'Match Finished';
-                
-                const d = matchDate.getDate().toString().padStart(2, '0');
-                const t = matchDate.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+                const mDate = new Date(f.fixture.date);
+                const d = mDate.getDate().toString().padStart(2, '0');
+                const timeText = mDate.toLocaleTimeString(currentLocale, { hour: '2-digit', minute: '2-digit' });
+                const homeFullName = escapeHtml(f.teams.home.name);
+                const awayFullName = escapeHtml(f.teams.away.name);
+                const homeDesktopName = escapeHtml(getProfessionalTeamName(f.teams.home.name));
+                const awayDesktopName = escapeHtml(getProfessionalTeamName(f.teams.away.name));
 
                 html += `
-                    <div class="relative flex items-center justify-between p-3 rounded-xl border ${isToday || isLive ? 'border-crimson/60 bg-crimson/5 shadow-[0_4px_20px_rgba(200,16,46,0.15)]' : 'border-white/5 bg-black/20 hover:bg-white/5'} transition-all group shrink-0">
-                        <div class="flex flex-col items-center w-[25%] px-1">
-                            <span class="font-heading text-lg text-white/90 leading-none">${d}</span>
-                            <span class="text-[9px] text-white/40 font-bold tracking-widest mt-0.5">${MONTHS_PL_SHORT[month]}</span>
-                            <span class="text-[10px] text-crimson font-bold tracking-widest mt-1">${t}</span>
+                    <div class="relative flex items-center justify-between p-4 sm:p-5 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all group shrink-0 shadow-lg gap-4 lg:gap-5 xl:gap-6">
+                        <div class="flex flex-col items-center w-[78px] sm:w-[22%] lg:w-[92px] xl:w-[104px] border-r border-white/10 pr-3 sm:pr-4 shrink-0">
+                            <span class="font-heading text-2xl text-white tracking-widest leading-none mb-1">${d}</span>
+                            <span class="text-[9px] text-white/30 font-black tracking-[0.2em] uppercase" data-i18n-month="${month}" data-i18n-short></span>
+                            <span class="text-[10px] text-crimson font-black tracking-widest mt-2">${timeText}</span>
                         </div>
-                        <div class="flex items-center justify-between gap-1 w-[75%] px-1 text-center">
-                            <img src="${f.teams.home.logo}" class="w-8 h-8 object-contain" title="${f.teams.home.name}">
-                            <div class="flex flex-col items-center justify-center w-[40%]">
-                                ${isFinished || isLive
-                                    ? `<span class="font-heading text-2xl text-white font-bold tracking-widest whitespace-nowrap">${f.goals.home} - ${f.goals.away}</span>` 
-                                    : `<span class="text-white/20 font-bold text-base">- : -</span>`
-                                }
+                        <div class="flex items-center justify-between gap-2 sm:gap-4 lg:gap-5 flex-1 min-w-0 pl-1 sm:pl-4 lg:pl-5">
+                            <div class="flex flex-col items-center flex-1 gap-2 lg:gap-3 min-w-0 group/team">
+                                <img src="${f.teams.home.logo}" class="w-10 h-10 lg:w-11 lg:h-11 xl:w-12 xl:h-12 object-contain group-hover/team:scale-125 transition-transform" title="${homeFullName}" alt="${homeFullName}">
+                                <span class="block lg:hidden text-[10px] sm:text-[11px] uppercase tracking-[0.08em] sm:tracking-[0.14em] text-white/60 text-center leading-tight whitespace-normal break-words w-full px-1">${homeFullName}</span>
+                                <span class="hidden lg:flex text-[12px] xl:text-[13px] uppercase tracking-[0.08em] xl:tracking-[0.12em] text-white/75 text-center whitespace-normal break-words w-full px-2" style="max-width: 160px; min-height: 2.6rem; line-height: 1.25; margin: 0 auto; align-items: center; justify-content: center;" title="${homeFullName}">${homeDesktopName}</span>
                             </div>
-                            <img src="${f.teams.away.logo}" class="w-8 h-8 object-contain" title="${f.teams.away.name}">
+                            <div class="flex flex-col items-center justify-center shrink-0 min-w-[44px] sm:min-w-[80px]">
+                                <span class="text-white/10 font-black text-xl tracking-[0.3em] uppercase">VS</span>
+                            </div>
+                            <div class="flex flex-col items-center flex-1 gap-2 lg:gap-3 min-w-0 group/team">
+                                <img src="${f.teams.away.logo}" class="w-10 h-10 lg:w-11 lg:h-11 xl:w-12 xl:h-12 object-contain group-hover/team:scale-125 transition-transform" title="${awayFullName}" alt="${awayFullName}">
+                                <span class="block lg:hidden text-[10px] sm:text-[11px] uppercase tracking-[0.08em] sm:tracking-[0.14em] text-white/60 text-center leading-tight whitespace-normal break-words w-full px-1">${awayFullName}</span>
+                                <span class="hidden lg:flex text-[12px] xl:text-[13px] uppercase tracking-[0.08em] xl:tracking-[0.12em] text-white/75 text-center whitespace-normal break-words w-full px-2" style="max-width: 160px; min-height: 2.6rem; line-height: 1.25; margin: 0 auto; align-items: center; justify-content: center;" title="${awayFullName}">${awayDesktopName}</span>
+                            </div>
                         </div>
                     </div>
                 `;
             });
             container.innerHTML = html;
+            if(window.applyCagliariTranslations) window.applyCagliariTranslations();
         };
 
+        function dedupeSquadPlayers(players) {
+            const seen = new Set();
+
+            return players.filter(player => {
+                const key = player.id != null
+                    ? `id:${player.id}`
+                    : `name:${(player.fullName || '').trim().toLowerCase()}`;
+
+                if (!key || seen.has(key)) {
+                    return false;
+                }
+
+                seen.add(key);
+                return true;
+            });
+        }
+
+        function sortSquadPlayers(players) {
+            const posOrder = { 'Goalkeeper': 1, 'Defender': 2, 'Midfielder': 3, 'Attacker': 4 };
+
+            return [...players].sort((a, b) => {
+                const positionA = posOrder[a.position] ?? 99;
+                const positionB = posOrder[b.position] ?? 99;
+
+                if (positionA !== positionB) {
+                    return positionA - positionB;
+                }
+
+                const numberA = a.number ?? 999;
+                const numberB = b.number ?? 999;
+
+                if (numberA !== numberB) {
+                    return numberA - numberB;
+                }
+
+                return a.fullName.localeCompare(b.fullName);
+            });
+        }
+
+        function splitSquadPlayers(players) {
+            let pool = sortSquadPlayers(dedupeSquadPlayers(players));
+            const takeByPosition = (position, count) => {
+                const picked = [];
+                const remaining = [];
+
+                pool.forEach(player => {
+                    if (player.position === position && picked.length < count) {
+                        picked.push(player);
+                        return;
+                    }
+
+                    remaining.push(player);
+                });
+
+                pool = remaining;
+                return picked;
+            };
+
+            const mainSquad = [
+                ...takeByPosition('Goalkeeper', 1),
+                ...takeByPosition('Defender', 4),
+                ...takeByPosition('Midfielder', 3),
+                ...takeByPosition('Attacker', 3)
+            ];
+
+            if (mainSquad.length < 11) {
+                mainSquad.push(...pool.splice(0, Math.min(11 - mainSquad.length, pool.length)));
+            }
+
+            const reserves = pool.splice(0, Math.min(9, pool.length));
+            const remainingPlayers = pool;
+
+            return {
+                mainSquad: sortSquadPlayers(mainSquad),
+                reserves: sortSquadPlayers(reserves),
+                remainingPlayers: sortSquadPlayers(remainingPlayers)
+            };
+        }
+
         // 4. KADRA ZESPOŁU (LISTA Z PEŁNYMI IMIONAMI I PODZIAŁEM NA GŁÓWNĄ I REZERWY)
-        async function loadSquad(forceRefresh = false) {
+        async function loadSquad() {
             document.getElementById('squad-loader').style.display = 'block';
             const container = document.getElementById('squad-container');
 
             try {
-                // Fetch `/players/squads` for reliable shirt numbers and positions
-                const squadData = await fetchWithCache(`/players/squads?team=${TEAM_ID}`, forceRefresh); 
-                
-                // Fetch `/players` for full names and statistics (minutes played to determine reserves)
-                const playersP1 = await fetchWithCache(`/players?team=${TEAM_ID}&season=${currentSeason}&page=1`, forceRefresh);
-                const playersP2 = await fetchWithCache(`/players?team=${TEAM_ID}&season=${currentSeason}&page=2`, forceRefresh);
-                
-                let detailedPlayers = [];
-                if (playersP1) detailedPlayers = detailedPlayers.concat(playersP1);
-                if (playersP2) detailedPlayers = detailedPlayers.concat(playersP2);
+                const squadData = await fetchApiData(`/players/squads?team=${API_SPORTS_TEAM_ID}`);
+                const mergedSquad = normalizeApiSportsSquadPlayers(squadData)
+                    .map((player, index) => ({
+                        id: player.id ?? index,
+                        number: player.number ?? null,
+                        position: player.position || 'Midfielder',
+                        photo: player.photo || '',
+                        fullName: player.fullName || `Player ${index + 1}`
+                    }));
 
-                if (!squadData || !squadData[0] || !squadData[0].players) {
-                    container.innerHTML = `<div class="w-full text-center py-20 text-white/50 bg-black/50 rounded-lg z-50">Brak dostępnej kadry dla tego zapytania.</div>`;
+                if (mergedSquad.length === 0) {
+                    document.getElementById('squad-loader').style.display = 'none';
+                    container.innerHTML = `<div class="w-full text-center py-20 text-white/50 bg-black/50 rounded-lg z-50" data-i18n="cagliari_squad_unavailable">${t('cagliari_squad_unavailable', 'Squad is not available for this request.')}</div>`;
+                    if(window.applyCagliariTranslations) window.applyCagliariTranslations();
                     return;
                 }
 
-                // Merge data: Squad API defines the base list, Detailed API gives full name & stats
-                const mergedSquad = squadData[0].players.map(sp => {
-                    const dpMatch = detailedPlayers.find(dp => dp.player.id === sp.id);
-                    let fullName = sp.name;
-                    let minutes = 0;
-                    
-                    if (dpMatch) {
-                        fullName = `${dpMatch.player.firstname} ${dpMatch.player.lastname}`.trim();
-                        // Find the league stats to sum minutes, or just grab the first valid statistic
-                        const stats = dpMatch.statistics || [];
-                        stats.forEach(st => {
-                            if (st.games && st.games.minutes) minutes += st.games.minutes;
-                        });
-                    }
+                const { mainSquad, reserves, remainingPlayers } = splitSquadPlayers(mergedSquad);
 
-                    return {
-                        ...sp,
-                        fullName: fullName,
-                        minutes: minutes
-                    };
-                });
-
-                // Separate Main Squad vs Reserves
-                // Heuristic: If average club minutes are low (e.g. season just started), we classify everyone as Main.
-                // Otherwise, players with 0-50 minutes are likely reserves.
-                const totalMinutesInSquad = mergedSquad.reduce((sum, p) => sum + p.minutes, 0);
-                const isNewSeason = totalMinutesInSquad < 500; 
-
-                // Let's sort them all by minutes played descending so we can easily pick the top ~16-18
-                mergedSquad.sort((a,b) => b.minutes - a.minutes);
-                
-                let mainSquad = [];
-                let reserves = [];
-
-                if (isNewSeason) {
-                    // If no one played yet, use ID or number to guess, but mostly put everyone in main
-                    mainSquad = mergedSquad; 
-                } else {
-                    // Top 16 players by minutes are "Main Squad", the rest are "Reserves"
-                    mainSquad = mergedSquad.slice(0, 16);
-                    reserves = mergedSquad.slice(16);
-                }
-
-                // Render function for a group of players
-                const renderGroup = (players, titleKey, titleFallback) => {
+                // Render function for a group of players with improved translation support
+                const renderGroup = (players, titleKey, titleFallback, useDivider = false) => {
                     if(players.length === 0) return '';
                     
-                    // Inside the group, sort by Position roughly, then by Number
-                    const posOrder = { 'Goalkeeper': 1, 'Defender': 2, 'Midfielder': 3, 'Attacker': 4 };
-                    players.sort((a,b) => {
-                        if (posOrder[a.position] !== posOrder[b.position]) return posOrder[a.position] - posOrder[b.position];
-                        return (a.number || 99) - (b.number || 99);
-                    });
+                    const sortedPlayers = sortSquadPlayers(players);
+
+                    const headerHtml = useDivider
+                        ? `
+                            <div class="relative flex items-center justify-center mb-8 pt-2">
+                                <div class="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"></div>
+                                <span class="relative px-5 py-2 rounded-full border border-white/10 bg-navy-dark text-[10px] font-bold tracking-[0.32em] uppercase text-white/60" data-i18n="${titleKey}">
+                                    ${titleFallback}
+                                </span>
+                            </div>
+                        `
+                        : `
+                            <h4 class="text-2xl sm:text-3xl font-heading text-white/90 tracking-widest uppercase mb-6 flex items-center gap-4" data-i18n="${titleKey}">
+                                <span class="w-2 h-8 bg-crimson rounded-full shadow-[0_0_15px_#c8102e]"></span>
+                                ${titleFallback}
+                            </h4>
+                        `;
 
                     let html = `
                     <div class="w-full">
-                        <h4 class="text-2xl font-heading text-white/80 tracking-widest uppercase mb-6 border-l-4 border-crimson pl-4" data-i18n="${titleKey}">${titleFallback}</h4>
-                        <div class="flex flex-col gap-2">
+                        ${headerHtml}
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     `;
                     
-                    players.forEach(p => {
-                        let posKey = "midfielders";
-                        if(p.position === 'Attacker') posKey = 'attackers';
-                        if(p.position === 'Defender') posKey = 'defenders';
-                        if(p.position === 'Goalkeeper') posKey = 'goalkeepers';
-                        let posFallback = p.position;
-                        if(posKey === 'attackers') posFallback = 'Napastnicy';
-                        if(posKey === 'defenders') posFallback = 'Obrońcy';
-                        if(posKey === 'midfielders') posFallback = 'Pomocnicy';
-                        if(posKey === 'goalkeepers') posFallback = 'Bramkarze';
+                    sortedPlayers.forEach(p => {
+                        const positionMeta = getPositionMeta(p.position);
 
                         html += `
-                        <div class="flex items-center justify-between p-4 bg-black/40 hover:bg-crimson/10 transition-colors border border-white/5 rounded-xl group">
-                            <div class="flex items-center gap-5 sm:gap-6">
-                                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-crimson/50 transition-colors shrink-0 bg-white/5 flex items-center justify-center">
+                        <div class="squad-player-card flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/5 hover:bg-crimson/5 transition-all border border-white/5 rounded-2xl group relative overflow-hidden gap-4">
+                            <div class="absolute inset-0 bg-gradient-to-r from-crimson/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="flex items-center gap-4 sm:gap-6 relative z-10 min-w-0 w-full">
+                                <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-crimson/50 transition-colors shrink-0 bg-white/5 shadow-2xl">
                                     <img src="${p.photo}" alt="${p.fullName}" loading="lazy" class="w-full h-full object-cover">
                                 </div>
-                                <div class="flex flex-col border-l border-white/10 pl-5 sm:pl-6">
-                                    <span class="text-white font-heading text-xl sm:text-2xl tracking-wider uppercase drop-shadow-sm">${p.fullName}</span>
-                                    <span class="text-white/40 text-[10px] sm:text-xs uppercase tracking-widest mt-1 group-hover:text-white/70 transition-colors" data-i18n="cagliari_${posKey}">${posFallback}</span>
+                                <div class="squad-player-meta flex flex-col border-l border-white/10 pl-4 sm:pl-6 min-w-0">
+                                    <span class="squad-player-name text-white font-heading text-lg sm:text-xl md:text-2xl tracking-[0.12em] sm:tracking-wider uppercase leading-tight">${p.fullName}</span>
+                                    <span class="mt-2 inline-flex items-center gap-2 self-start rounded-full border border-white/10 bg-black/30 px-3 py-1">
+                                        <span class="text-sm leading-none" aria-hidden="true">${positionMeta.icon}</span>
+                                        <span class="text-white/60 text-[9px] sm:text-[10px] uppercase font-bold tracking-[0.2em] group-hover:text-white/80 transition-colors" data-i18n="${positionMeta.key}">${t(positionMeta.key, positionMeta.fallback)}</span>
+                                    </span>
                                 </div>
                             </div>
-                            <div class="text-3xl sm:text-4xl text-crimson font-black font-heading opacity-50 flex items-baseline gap-1 group-hover:opacity-100 transition-opacity pr-2 sm:pr-6">
+                            <div class="squad-player-number text-4xl sm:text-5xl text-crimson font-black font-heading opacity-20 flex items-baseline gap-1 group-hover:opacity-80 transition-all pr-0 sm:pr-4 relative z-10 self-end sm:self-auto">
                                 ${p.number ? `
-                                    <span class="text-base sm:text-lg text-white/30 font-light opacity-50">#</span>
+                                    <span class="text-sm text-white/20 font-light mr-0.5">#</span>
                                     <div>${p.number}</div>
                                 ` : '-'}
                             </div>
@@ -617,8 +1329,9 @@
                 };
 
                 let finalHtml = '<div class="w-full flex flex-col gap-12">';
-                finalHtml += renderGroup(mainSquad, 'cagliari_main_squad', 'Główna Kadra');
-                finalHtml += renderGroup(reserves, 'cagliari_reserves', 'Rezerwy');
+                finalHtml += renderGroup(mainSquad, 'cagliari_main_squad', t('cagliari_main_squad', 'Main Squad'));
+                finalHtml += renderGroup(reserves, 'cagliari_reserves', t('cagliari_reserves', 'Reserves'), true);
+                finalHtml += renderGroup(remainingPlayers, 'cagliari_remaining_players', t('cagliari_remaining_players', 'Remaining Players'), true);
                 finalHtml += '</div>';
                 
                 container.innerHTML = finalHtml;
@@ -631,16 +1344,40 @@
             } catch (err) {
                 console.error(err);
                 document.getElementById('squad-loader').style.display = 'none';
-                container.innerHTML = `<div class="w-full text-center py-20 text-white/50 bg-black/50 rounded-lg z-50">Wystąpił błąd podczas pobierania kadr. Spróbuj później.</div>`;
+                container.innerHTML = `<div class="w-full text-center py-20 text-white/50 bg-black/50 rounded-lg z-50" data-i18n="cagliari_squad_error">${t('cagliari_squad_error', 'An error occurred while loading the squad. Please try again later.')}</div>`;
+                if(window.applyCagliariTranslations) window.applyCagliariTranslations();
             }
         }
 
+        function refreshTranslatedView() {
+            updateSeasonDropdownUI();
+
+            if(window.applyCagliariTranslations) {
+                window.applyCagliariTranslations();
+            }
+
+            if (!ALL_FIXTURES.length) return;
+
+            renderLiveAndNextMatch();
+            renderLatestMatches();
+
+            if (typeof window.activeCalendarMonth === 'number') {
+                changeMonth(window.activeCalendarMonth);
+            } else {
+                initCalendarUI();
+            }
+        }
+
+        window.addEventListener('appLanguageChanged', refreshTranslatedView);
+
         document.addEventListener('DOMContentLoaded', () => {
-            loadAllData(false); // Initially load from cache if valid. If user changes season, it skips cache.
+            refreshAllUI();
         });
     </script>
+
     <!-- REACT FOOTER MOUNT -->
     <div id="cagliari-footer-root"></div>
+
     <script type="module" src="/src/cagliari.jsx"></script>
 </body>
 </html>

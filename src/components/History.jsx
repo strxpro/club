@@ -6,16 +6,43 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+function SectionImage({ src, alt, className = '', imgClassName = '', imgStyle, children, loading = 'lazy' }) {
+    const [loaded, setLoaded] = useState(false);
+
+    return (
+        <div className={`relative overflow-hidden ${className}`}>
+            {!loaded && (
+                <div className="absolute inset-0 z-10 overflow-hidden bg-white/5">
+                    <div className="w-full h-full animate-pulse bg-white/5" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skeleton-shimmer" />
+                </div>
+            )}
+            <img
+                src={src}
+                alt={alt}
+                loading={loading}
+                decoding="async"
+                onLoad={() => setLoaded(true)}
+                className={`${imgClassName} transition-opacity duration-700 ${loaded ? 'opacity-100' : 'opacity-0'}`.trim()}
+                style={imgStyle}
+            />
+            {children}
+        </div>
+    );
+}
+
 export default function History() {
     const { t } = useTranslation();
     const anchorRef = useRef(null);
     const sectionRef = useRef(null);
     const founderImgRef = useRef(null);
     const founderTxtRef = useRef(null);
+    const textContentRefs = useRef({});
 
     const [activeStop, setActiveStop] = useState(0);
     const [isSnapping, setIsSnapping] = useState(false);
     const [expandedEntries, setExpandedEntries] = useState({});
+    const [textHeights, setTextHeights] = useState({});
 
     const [isMobile, setIsMobile] = useState(false);
     const [touchStartX, setTouchStartX] = useState(0);
@@ -40,6 +67,9 @@ export default function History() {
         { year: '1989', subtitle: t('timeline_1989_subtitle'), text: t('timeline_1989_text'), img: '/images/hisotria/1989.webp' },
         { year: '2020', subtitle: t('timeline_2020_subtitle'), text: t('timeline_2020_text'), img: '/images/hisotria/2020.jpeg' },
     ], [t]);
+
+    const desktopImagePositions = ['center 34%', 'center center', 'center 32%', 'center 28%', 'center 34%', 'center 30%', 'center center'];
+    const mobileImagePositions = ['center 32%', 'center center', 'center 30%', 'center 28%', 'center 34%', 'center 30%', 'center center'];
 
     const N = entries.length;
     const N_STOPS = (N - 1) * 4 + 1;
@@ -81,6 +111,50 @@ export default function History() {
 
     const activeSlideInt = Math.floor(activeStop / 4);
     const activeSlideFloat = activeStop / 4;
+
+    const measureTextHeights = useCallback(() => {
+        if (!isMobile) {
+            return;
+        }
+
+        const nextHeights = {};
+
+        Object.entries(textContentRefs.current).forEach(([key, node]) => {
+            if (node) {
+                nextHeights[key] = node.scrollHeight;
+            }
+        });
+
+        setTextHeights((currentHeights) => {
+            const currentKeys = Object.keys(currentHeights);
+            const nextKeys = Object.keys(nextHeights);
+
+            if (currentKeys.length === nextKeys.length && nextKeys.every((key) => currentHeights[key] === nextHeights[key])) {
+                return currentHeights;
+            }
+
+            return nextHeights;
+        });
+    }, [isMobile]);
+
+    useEffect(() => {
+        if (!isMobile) {
+            setTextHeights({});
+            return undefined;
+        }
+
+        const frameId = window.requestAnimationFrame(measureTextHeights);
+        return () => window.cancelAnimationFrame(frameId);
+    }, [activeSlideInt, expandedEntries, isMobile, measureTextHeights]);
+
+    useEffect(() => {
+        if (!isMobile) {
+            return undefined;
+        }
+
+        window.addEventListener('resize', measureTextHeights, { passive: true });
+        return () => window.removeEventListener('resize', measureTextHeights);
+    }, [isMobile, measureTextHeights]);
 
     const navigateToStop = useCallback((stopIdx) => {
         if (isMobile) {
@@ -173,14 +247,14 @@ export default function History() {
 
                     <div className="bg-navy" style={{
                         flex: 1,
-                        display: 'flex',
+                        display: isMobile ? 'block' : 'flex',
                         borderRadius: '12px',
                         overflow: 'hidden',
                         border: '1px solid rgba(255,255,255,0.05)',
                         boxShadow: '0 40px 100px rgba(0,0,0,0.8)',
                         position: 'relative',
                         userSelect: 'none',
-                        minHeight: isMobile ? '75vh' : 0
+                        minHeight: isMobile ? 'auto' : 0
                     }}>
                         {/* ══ LEFT RULER PANEL ══ */}
                         <div className="hidden md:flex" style={{
@@ -261,15 +335,15 @@ export default function History() {
                             onTouchStart={handleTouchStart}
                             onTouchEnd={handleTouchEnd}
                             style={{
-                            flex: 1,
+                            flex: isMobile ? 'unset' : 1,
                             display: 'flex',
                             flexDirection: 'column',
-                            overflow: 'hidden',
+                            overflow: isMobile ? 'visible' : 'hidden',
                             position: 'relative',
                             background: 'radial-gradient(circle at center, rgba(30,40,55,0.4) 0%, transparent 70%)',
-                            minHeight: 0
+                            minHeight: isMobile ? 'auto' : 0
                         }}>
-                            <div style={{ width: '82%', margin: '0 auto', position: 'relative', flex: 1, display: 'flex', alignItems: 'center', minHeight: 0 }}>
+                            <div style={{ width: isMobile ? '100%' : '82%', margin: '0 auto', position: 'relative', flex: isMobile ? 'unset' : 1, display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', minHeight: isMobile ? 'auto' : 0 }}>
                                 <div style={{
                                     display: 'flex',
                                     width: '100%',
@@ -282,6 +356,12 @@ export default function History() {
                                         const scale = Math.max(0.6, 1 - dist * 0.15);
                                         const opacity = Math.max(0, 1 - dist * 1.5);
                                         const filter = `brightness(${1 - dist * 0.6}) grayscale(${dist * 100}%)`;
+                                        const isExpanded = Boolean(expandedEntries[i]);
+                                        const canToggleText = isMobile && entry.text.length > 170;
+                                        const previewText = canToggleText && !isExpanded
+                                            ? `${entry.text.substring(0, 170).trimEnd()}...`
+                                            : entry.text;
+                                        const imagePosition = isMobile ? (mobileImagePositions[i] || 'center center') : (desktopImagePositions[i] || 'center center');
 
                                         return (
                                             <div
@@ -289,7 +369,7 @@ export default function History() {
                                                 style={{
                                                     flex: '0 0 100%',
                                                     display: 'flex',
-                                                    alignItems: 'center',
+                                                    alignItems: isMobile ? 'flex-start' : 'center',
                                                     justifyContent: 'center',
                                                     transition: `opacity 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`,
                                                     transform: `scale(${scale})`,
@@ -298,12 +378,18 @@ export default function History() {
                                                     pointerEvents: isActive ? 'auto' : 'none',
                                                 }}
                                             >
-                                                    <div className="flex flex-col md:flex-row w-full gap-4 md:gap-[4%] max-h-[75vh] md:max-h-none overflow-y-auto md:overflow-visible pb-[80px] md:pb-0" style={{ width: '100%', alignItems: 'center', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                                                    <div className="flex flex-col md:flex-row w-full gap-5 md:gap-[4%] px-1 sm:px-0" style={{ width: '100%', maxWidth: isMobile ? 'calc(100% - 16px)' : '100%', margin: '0 auto', alignItems: isMobile ? 'stretch' : 'center', maxHeight: isMobile ? 'none' : '75vh', overflowY: isMobile ? 'visible' : 'auto', overflowX: 'hidden', scrollbarWidth: 'none', msOverflowStyle: 'none', paddingTop: isMobile ? '14px' : '0px', paddingBottom: isMobile ? '122px' : '88px' }}>
                                                         <style>{`::-webkit-scrollbar { display: none; }`}</style>
-                                                        <div className={`w-full md:w-[48%] ${expandedEntries[i] && isMobile ? 'min-h-[15vh] max-h-[15vh]' : 'min-h-[25vh] max-h-[35vh]'} md:max-h-none md:!h-[50vh] shrink-0 rounded-[8px] overflow-hidden shadow-[0_8px_60px_rgba(0,0,0,0.5)] transition-all duration-700 ease-in-out`}>
-                                                            <img src={entry.img} alt={entry.subtitle} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'grayscale(60%) contrast(1.08)' }} />
-                                                        </div>
-                                                    <div className="flex-1 flex flex-col justify-center text-center md:text-left items-center md:items-start mt-2 md:mt-0 px-6 sm:px-12 md:px-0 transition-all duration-500 ease-in-out w-full">
+                                                    <div className={`${isMobile ? 'w-full px-3' : 'md:w-[42%] lg:w-[40%] max-w-[430px]'} shrink-0 ${isMobile ? '' : 'mx-auto md:mx-0'}`}>
+                                                        <SectionImage
+                                                            src={entry.img}
+                                                            alt={entry.subtitle}
+                                                            className={`w-full aspect-square ${isMobile ? 'rounded-[16px]' : 'rounded-[14px]'} border border-white/5 shadow-[0_8px_60px_rgba(0,0,0,0.5)] transition-all duration-700 ease-in-out`}
+                                                            imgClassName="absolute inset-0 block"
+                                                            imgStyle={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', objectFit: 'cover', filter: 'grayscale(60%) contrast(1.08)', objectPosition: imagePosition, transform: 'scale(1.08)', transformOrigin: imagePosition }}
+                                                        />
+                                                    </div>
+                                                    <div className={`${isMobile ? 'w-full px-3' : 'flex-1'} flex flex-col ${isMobile ? 'justify-start items-start text-left' : 'justify-center text-center md:text-left items-center md:items-start'} mt-3 md:mt-0 transition-all duration-500 ease-in-out min-w-0`}>
                                                         <div style={{ fontSize: 'clamp(3.5rem, 6vw, 6rem)', fontWeight: 900, color: '#ffffff', lineHeight: 1, marginBottom: '12px', letterSpacing: '-0.03em', fontFamily: "'Inter', sans-serif" }}>
                                                             {entry.year}
                                                         </div>
@@ -311,17 +397,36 @@ export default function History() {
                                                         <div style={{ fontSize: 'clamp(1rem, 1.8vw, 1.3rem)', fontWeight: 600, color: '#8899aa', marginBottom: '12px', letterSpacing: '0.03em' }}>
                                                             {entry.subtitle}
                                                         </div>
-                                                        <div style={{ fontSize: 'clamp(0.85rem, 1.2vw, 1rem)', lineHeight: 1.8, color: '#6a7a8a', maxWidth: '440px', width: '100%' }}>
-                                                            {(!isMobile || expandedEntries[i] || entry.text.length <= 150) 
-                                                                ? entry.text 
-                                                                : entry.text.substring(0, 150) + '...'}
-                                                            {(isMobile && entry.text.length > 150) && (
-                                                                <span 
-                                                                    onClick={() => toggleReadMore(i)} 
-                                                                    className="ml-2 font-semibold text-crimson cursor-pointer hover:underline pointer-events-auto inline-block"
+                                                        <div style={{ fontSize: 'clamp(0.9rem, 1.2vw, 1rem)', lineHeight: isMobile ? 1.75 : 1.8, color: '#6a7a8a', maxWidth: isMobile ? '100%' : '440px', width: '100%', overflowWrap: 'break-word', wordBreak: 'break-word', hyphens: 'auto', textAlign: isMobile ? 'left' : 'inherit', paddingBottom: isMobile ? '4px' : '0px' }}>
+                                                            <div
+                                                                ref={(node) => {
+                                                                    if (node) {
+                                                                        textContentRefs.current[i] = node;
+                                                                    } else {
+                                                                        delete textContentRefs.current[i];
+                                                                    }
+                                                                }}
+                                                                style={{
+                                                                    overflow: 'hidden',
+                                                                    maxHeight: canToggleText
+                                                                        ? `${textHeights[i] ?? (isExpanded ? 320 : 118)}px`
+                                                                        : 'none',
+                                                                    transition: canToggleText
+                                                                        ? 'max-height 520ms cubic-bezier(0.22, 1, 0.36, 1)'
+                                                                        : undefined,
+                                                                    willChange: canToggleText ? 'max-height' : undefined,
+                                                                }}
+                                                            >
+                                                                <p style={{ margin: 0 }}>{previewText}</p>
+                                                            </div>
+                                                            {canToggleText && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => toggleReadMore(i)}
+                                                                    className="mt-3 font-semibold text-crimson cursor-pointer hover:underline pointer-events-auto inline-flex items-center justify-start bg-transparent border-none p-0"
                                                                 >
-                                                                    {expandedEntries[i] ? t('history_read_less') : t('history_read_more')}
-                                                                </span>
+                                                                    {isExpanded ? t('history_read_less') : t('history_read_more')}
+                                                                </button>
                                                             )}
                                                         </div>
                                                     </div>
@@ -334,25 +439,27 @@ export default function History() {
                         </div>
 
                         {/* ══ BOTTOM BAR ══ */}
-                        <div className="absolute bottom-0 left-0 md:left-[150px] right-0 h-[60px] border-t border-white/5 flex items-center px-4 md:px-8" style={{ background: 'rgba(0,0,0,0.25)' }}>
-                            <div className="flex items-center gap-2 text-[12px] tracking-[0.12em] text-[#4a5a6a] w-1/3 ml-8 sm:ml-12 md:ml-4">
-                                <span className="text-white font-bold text-[14px]">{String(activeSlideInt + 1).padStart(2, '0')}</span>
-                                <span className="mx-[2px]">/</span>
-                                <span className="text-[14px]">{String(N).padStart(2, '0')}</span>
-                            </div>
-                            <div className="flex justify-center gap-5 w-1/3">
-                                <button onClick={handlePrevSlide} className="w-11 h-11 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/15 text-white/70 hover:text-white transition-colors cursor-pointer z-50 pointer-events-auto">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                                </button>
-                                <button onClick={handleNextSlide} className="w-11 h-11 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/15 text-white/70 hover:text-white transition-colors cursor-pointer z-50 pointer-events-auto">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                                </button>
-                            </div>
-                            <div className="hidden md:flex items-center justify-end gap-[8px] text-[#4a5a6a] text-[11px] tracking-[0.18em] uppercase w-1/3 mr-4">
-                                <span>{t('history_scroll_hint') || 'scorri per esplorare'} </span>
-                                <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
-                                    <path d="M7 2v10M7 12l-2.5-2.5M7 12l2.5-2.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
-                                </svg>
+                        <div className="absolute bottom-0 left-0 md:left-[150px] right-0 h-[60px] border-t border-white/5 flex items-center px-3 sm:px-4 md:px-8" style={{ background: 'rgba(0,0,0,0.25)' }}>
+                            <div className="relative w-full h-full flex items-center justify-between">
+                                <div className="flex items-center gap-2 text-[12px] tracking-[0.12em] text-[#4a5a6a] w-auto sm:w-1/3 shrink-0" style={{ marginLeft: isMobile ? '4%' : '3.5%' }}>
+                                    <span className="text-white font-bold text-[14px]">{String(activeSlideInt + 1).padStart(2, '0')}</span>
+                                    <span className="mx-[2px]">/</span>
+                                    <span className="text-[14px]">{String(N).padStart(2, '0')}</span>
+                                </div>
+                                <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-5">
+                                    <button onClick={handlePrevSlide} className="w-11 h-11 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/15 text-white/70 hover:text-white transition-colors cursor-pointer z-50 pointer-events-auto">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                                    </button>
+                                    <button onClick={handleNextSlide} className="w-11 h-11 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/15 text-white/70 hover:text-white transition-colors cursor-pointer z-50 pointer-events-auto">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                    </button>
+                                </div>
+                                <div className="hidden md:flex items-center justify-end gap-[8px] text-[#4a5a6a] text-[11px] tracking-[0.18em] uppercase w-1/3 mr-4 ml-auto">
+                                    <span>{t('history_scroll_hint') || 'scorri per esplorare'} </span>
+                                    <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
+                                        <path d="M7 2v10M7 12l-2.5-2.5M7 12l2.5-2.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+                                    </svg>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -384,8 +491,9 @@ export default function History() {
                             {/* Row 1 */}
                             <div className="flex flex-col md:flex-row items-center gap-10 lg:gap-16 group">
                                 <div className="w-full md:w-1/2 aspect-video overflow-hidden rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 relative">
-                                    <img src="/images/1.jpeg" alt="Maratona di passione" loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-                                    <div className="absolute inset-0 bg-navy/20 group-hover:bg-transparent transition-colors duration-700" />
+                                    <SectionImage src="/images/1.jpeg" alt="Maratona di passione" className="w-full h-full" imgClassName="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                                        <div className="absolute inset-0 bg-navy/20 group-hover:bg-transparent transition-colors duration-700" />
+                                    </SectionImage>
                                 </div>
                                 <div className="w-full md:w-1/2 flex flex-col items-start text-left px-4 md:px-0">
                                     <div className="text-white font-heading text-7xl font-black opacity-20 mb-[-25px] select-none">01</div>
@@ -400,8 +508,9 @@ export default function History() {
                             {/* Row 2 */}
                             <div className="flex flex-col md:flex-row-reverse items-center gap-10 lg:gap-16 group">
                                 <div className="w-full md:w-1/2 aspect-video overflow-hidden rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 relative">
-                                    <img src="https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=800&auto=format&fit=crop" loading="lazy" decoding="async" alt="Eravamo testimoni" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-                                    <div className="absolute inset-0 bg-navy/20 group-hover:bg-transparent transition-colors duration-700" />
+                                    <SectionImage src="https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=800&auto=format&fit=crop" alt="Eravamo testimoni" className="w-full h-full" imgClassName="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                                        <div className="absolute inset-0 bg-navy/20 group-hover:bg-transparent transition-colors duration-700" />
+                                    </SectionImage>
                                 </div>
                                 <div className="w-full md:w-1/2 flex flex-col items-start md:items-end text-left md:text-right px-4 md:px-0">
                                     <div className="text-white font-heading text-7xl font-black opacity-20 mb-[-25px] select-none">02</div>
@@ -416,8 +525,9 @@ export default function History() {
                             {/* Row 3 */}
                             <div className="flex flex-col md:flex-row items-center gap-10 lg:gap-16 group">
                                 <div className="w-full md:w-1/2 aspect-video overflow-hidden rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 relative">
-                                    <img src="/images/campo.png" alt="Il club come famiglia" loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-                                    <div className="absolute inset-0 bg-navy/20 group-hover:bg-transparent transition-colors duration-700" />
+                                    <SectionImage src="/images/campo.png" alt="Il club come famiglia" className="w-full h-full" imgClassName="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                                        <div className="absolute inset-0 bg-navy/20 group-hover:bg-transparent transition-colors duration-700" />
+                                    </SectionImage>
                                 </div>
                                 <div className="w-full md:w-1/2 flex flex-col items-start text-left px-4 md:px-0">
                                     <div className="text-white font-heading text-7xl font-black opacity-20 mb-[-25px] select-none">03</div>
@@ -432,8 +542,9 @@ export default function History() {
                             {/* Row 4 */}
                             <div className="flex flex-col md:flex-row-reverse items-center gap-10 lg:gap-20 group mb-20 lg:mb-40">
                                 <div className="w-full md:w-1/2 aspect-video overflow-hidden rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 relative">
-                                    <img src="/images/4.jpeg" alt="Ospiti illustri" loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-                                    <div className="absolute inset-0 bg-navy/20 group-hover:bg-transparent transition-colors duration-700" />
+                                    <SectionImage src="/images/4.jpeg" alt="Ospiti illustri" className="w-full h-full" imgClassName="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                                        <div className="absolute inset-0 bg-navy/20 group-hover:bg-transparent transition-colors duration-700" />
+                                    </SectionImage>
                                 </div>
                                 <div className="w-full md:w-1/2 flex flex-col items-start md:items-end text-left md:text-right px-4 md:px-0">
                                     <div className="text-white font-heading text-7xl font-black opacity-20 mb-[-25px] select-none">04</div>
@@ -494,23 +605,38 @@ export default function History() {
                                     </div>
 
                                     {/* ── Image Column ── */}
-                                    <div className="w-full lg:w-[52%] relative isolate" style={{ padding: '1rem 1rem 1rem 0' }}>
-                                        <div className="relative w-full h-full overflow-hidden rounded-2xl min-h-[220px] md:min-h-[300px] lg:min-h-[380px]">
-                                            <img 
-                                                src="/images/g.jpg" 
-                                                alt="Giuseppe Papandrea" 
-                                                className="absolute inset-0 w-full h-full" 
-                                                style={{ 
-                                                    objectFit: 'cover', 
-                                                    objectPosition: 'center 20%',
-                                                    transform: 'scale(1.15)', 
-                                                    transformOrigin: 'center 20%' 
-                                                }} 
-                                            />
+                                    <div className="w-full lg:w-[52%] relative isolate p-4 lg:py-4 lg:pr-4 lg:pl-0 flex">
+                                        <SectionImage 
+                                            src="/images/g.jpg" 
+                                            alt="Giuseppe Papandrea" 
+                                            className="w-full flex-1 rounded-2xl min-h-[280px] md:min-h-[340px] lg:min-h-[420px]"
+                                            imgClassName="absolute inset-0 block"
+                                            imgStyle={isMobile ? {
+                                                position: 'absolute',
+                                                inset: 0,
+                                                width: '100%',
+                                                height: '100%',
+                                                display: 'block',
+                                                objectFit: 'cover',
+                                                objectPosition: 'center 18%',
+                                                transform: 'scale(1.12)',
+                                                transformOrigin: 'center center'
+                                            } : {
+                                                position: 'absolute',
+                                                inset: 0,
+                                                width: '100%',
+                                                height: '100%',
+                                                display: 'block',
+                                                objectFit: 'cover',
+                                                objectPosition: 'center 18%',
+                                                transform: 'scale(1.18)',
+                                                transformOrigin: 'center 18%'
+                                            }}
+                                        >
                                             {/* Gradient overlay for text contrast blending */}
                                             <div className="absolute inset-y-0 left-0 z-20 pointer-events-none" style={{ width: '180px', background: `linear-gradient(to right, rgba(11,16,30,1) 0%, rgba(11,16,30,0.97) 10%, rgba(11,16,30,0.88) 25%, rgba(11,16,30,0.70) 42%, rgba(11,16,30,0.45) 58%, rgba(11,16,30,0.20) 75%, rgba(11,16,30,0.06) 88%, transparent 100%)` }} />
                                             <div className="absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10 pointer-events-none rounded-b-2xl" />
-                                        </div>
+                                        </SectionImage>
                                     </div>
 
                                 </div>
@@ -540,8 +666,8 @@ export default function History() {
                             {/* Logo z.png dodane na środku z oddechem */}
                             <div className="mt-8 mb-12 lg:mt-20 lg:mb-16 flex justify-center items-center">
                                 <img 
-                                    src="/images/z.png" 
-                                    alt="Club Logo" 
+                                    src="/images/LOGO%20CAGLIARI%20CLUB%20PNG-OK.png" 
+                                    alt="Cagliari Club Logo" 
                                     loading="lazy" 
                                     decoding="async" 
                                     className="w-40 sm:w-56 lg:w-72 h-auto object-contain drop-shadow-[0_10px_40px_rgba(0,0,0,0.6)] hover:scale-105 transition-transform duration-700"

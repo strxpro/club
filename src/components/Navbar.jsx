@@ -10,8 +10,9 @@ export default function Navbar() {
     useEffect(() => {
         const handleScroll = () => {
             // Navbar becomes opaque only after scrolling past 80% of the viewport height (Hero section)
-            setScrolled(window.scrollY > window.innerHeight * 0.8);
+            setScrolled(window.scrollY > 8);
         };
+        handleScroll();
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
@@ -42,8 +43,8 @@ export default function Navbar() {
 
     return (
         <nav
-            className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled ? 'nav-glass' : 'bg-transparent'}`}
-            style={scrolled ? { boxShadow: '0 4px 30px rgba(255,255,255,0.04), 0 1px 0 rgba(255,255,255,0.06)' } : {}}
+            className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${scrolled ? 'nav-glass' : 'bg-transparent'}`}
+            style={scrolled ? { boxShadow: '0 14px 40px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.08)' } : {}}
         >
             <div className="container-main flex items-center justify-between h-20 md:h-24 transition-all duration-300">
                 {/* Logo */}
@@ -57,7 +58,7 @@ export default function Navbar() {
                         }
                     }}
                 >
-                    <img src="/images/t.png" alt="CC Gigi Riva STG" className="w-40 sm:w-64 h-auto object-contain max-h-24 md:max-h-36" />
+                    <img src="/images/CAGLIARI-CLUB-GIGI-RIVA-LOGO-WEB.png" alt="Cagliari Club Gigi Riva" className="w-40 sm:w-64 h-auto object-contain max-h-24 md:max-h-36" />
                 </a>
 
                 {/* Right side group (desktop nav or mobile switcher + humburger) */}
@@ -75,7 +76,7 @@ export default function Navbar() {
                         ))}
                         <a 
                             href="/cagliari.html" 
-                            className="ml-2 text-white hover:text-white text-base font-bold tracking-wider uppercase transition-all px-6 py-2.5 rounded-full border border-white/30 bg-transparent hover:border-white hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95"
+                            className="ml-2 inline-flex items-center justify-center whitespace-nowrap text-white text-[0.95rem] font-black tracking-[0.18em] uppercase transition-all px-6 py-2.5 rounded-full border border-crimson/45 bg-crimson/10 shadow-[0_0_18px_rgba(200,16,46,0.18)] hover:border-crimson/80 hover:bg-crimson/20 hover:shadow-[0_0_26px_rgba(200,16,46,0.32)] hover:scale-105 active:scale-95"
                         >
                             {t('nav_strefa_cagliari')}
                         </a>

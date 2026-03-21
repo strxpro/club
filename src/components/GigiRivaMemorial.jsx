@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useTranslation } from '../LanguageContext';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -11,6 +11,7 @@ export default function GigiRivaMemorial() {
     const cardRef = useRef(null);
     const contentRef = useRef(null);
     const imageRef = useRef(null);
+    const [imageLoaded, setImageLoaded] = useState(false);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
@@ -132,11 +133,17 @@ export default function GigiRivaMemorial() {
                             {/* ── Image Column ── */}
                             {/* p-4 gives breathing room so image is not glued to card border */}
                             <div
-                                className="w-full lg:w-[52%] relative isolate"
-                                style={{ padding: '1rem 1rem 1rem 0' }}
+                                className="w-full lg:w-[52%] relative isolate p-4 lg:py-4 lg:pr-4 lg:pl-0"
                             >
                                 {/* Inner wrapper clips image with rounded corners */}
                                 <div className="relative w-full h-full overflow-hidden rounded-2xl" style={{ minHeight: '380px' }}>
+
+                                    {!imageLoaded && (
+                                        <div className="absolute inset-0 z-10 overflow-hidden rounded-2xl bg-white/5">
+                                            <div className="w-full h-full animate-pulse bg-white/5" />
+                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skeleton-shimmer" />
+                                        </div>
+                                    )}
 
                                     <img
                                         ref={imageRef}
@@ -144,7 +151,8 @@ export default function GigiRivaMemorial() {
                                         alt="Gigi Riva Portrait"
                                         loading="lazy"
                                         decoding="async"
-                                        className="absolute inset-0 w-full h-full object-cover object-top"
+                                        onLoad={() => setImageLoaded(true)}
+                                        className={`absolute inset-0 w-full h-full object-cover object-center lg:object-top transition-opacity duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                                     />
 
                                     {/* ── Smooth torn-paper / deckled edge transition ──

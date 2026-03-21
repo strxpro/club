@@ -21,7 +21,7 @@ export default function Footer() {
                     {/* Logo & Info */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         <div>
-                            <img src="/images/t.png" alt="CC Gigi Riva STG" style={{ width: '180px', height: 'auto', objectFit: 'contain' }} />
+                            <img src="/images/CAGLIARI-CLUB-GIGI-RIVA-LOGO-WEB.png" alt="Cagliari Club Gigi Riva" style={{ width: '220px', height: 'auto', objectFit: 'contain' }} />
                         </div>
                         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', lineHeight: 1.6 }}>
                             Cagliari Club Gigi Riva<br />Santa Teresa Gallura

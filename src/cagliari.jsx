@@ -1,9 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { LanguageProvider, useTranslation } from './LanguageContext';
+import { LanguageProvider } from './LanguageContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import './index.css';
+
+import { translations } from './translations';
+
+const SUPPORTED_LANGUAGES = ['it', 'en', 'pl', 'de', 'es', 'fr'];
+const LANGUAGE_STORAGE_KEY = 'appLanguage';
 
 const CagliariNav = () => (
     <LanguageProvider>
@@ -30,68 +35,97 @@ if (footerRoot) {
 }
 
 // Simple translation logic for statically rendered static HTML in cagliari.html
-const CAGLIARI_TRANSLATIONS = {
-    cagliari_stats_title: {
-        it: 'Statistiche', en: 'Statistics', pl: 'Statystyki', de: 'Statistiken', es: 'Estadísticas', fr: 'Statistiques'
-    },
-    cagliari_latest_match: {
-        it: 'Ultima Partita', en: 'Latest Match', pl: 'Ostatni Mecz', de: 'Letztes Spiel', es: 'Último Partido', fr: 'Dernier Match'
-    },
-    cagliari_live_match: {
-        it: 'Partita in Diretta', en: 'Live Match', pl: 'Mecz Na Żywo', de: 'Live-Spiel', es: 'Partido en Vivo', fr: 'Match en Direct'
-    },
-    cagliari_no_live_match: {
-        it: 'Nessuna partita in corso', en: 'No match currently playing', pl: 'Aktualnie brak meczu', de: 'Derzeit kein Spiel', es: 'No hay partido en vivo', fr: 'Aucun match en cours'
-    },
-    cagliari_squad: {
-        it: 'Rosa della Squadra', en: 'Squad', pl: 'Kadra Zespołu', de: 'Kader', es: 'Plantilla', fr: 'Équipe'
-    },
-    cagliari_standings: {
-        it: 'Classifica', en: 'Standings', pl: 'Tabela Ligi', de: 'Tabelle', es: 'Clasificación', fr: 'Classement'
-    },
-    cagliari_no_upcoming: {
-        it: 'Nessun match imminente', en: 'No upcoming matches', pl: 'Brak najbliższego meczu', de: 'Keine anstehenden Spiele', es: 'No hay próximos partidos', fr: 'Aucun match à venir'
-    },
-    cagliari_goalkeepers: {
-        it: 'Portieri', en: 'Goalkeepers', pl: 'Bramkarze', de: 'Torhüter', es: 'Porteros', fr: 'Gardiens'
-    },
-    cagliari_defenders: {
-        it: 'Difensori', en: 'Defenders', pl: 'Obrońcy', de: 'Verteidiger', es: 'Defensas', fr: 'Défenseurs'
-    },
-    cagliari_midfielders: {
-        it: 'Centrocampisti', en: 'Midfielders', pl: 'Pomocnicy', de: 'Mittelfeldspieler', es: 'Centrocampistas', fr: 'Milieux'
-    },
-    cagliari_attackers: {
-        it: 'Attaccanti', en: 'Attackers', pl: 'Napastnicy', de: 'Stürmer', es: 'Delanteros', fr: 'Attaquants'
+const getCurrentCagliariLang = () => {
+    let storedLang = '';
+
+    try {
+        storedLang = window.localStorage?.getItem(LANGUAGE_STORAGE_KEY) || '';
+    } catch (error) {
+        storedLang = '';
     }
+
+    const lang = (storedLang || window.__appLanguage || document.documentElement.lang || navigator.language || 'it').slice(0, 2).toLowerCase();
+    return SUPPORTED_LANGUAGES.includes(lang) ? lang : 'it';
+};
+
+const getCagliariTranslation = (key, fallback = key) => {
+    const lang = getCurrentCagliariLang();
+    return translations[key]?.[lang] ?? fallback;
 };
 
 const applyCagliariTranslations = () => {
-    const lang = localStorage.getItem('appLang') || 'it';
+    const lang = getCurrentCagliariLang();
+    document.documentElement.lang = lang;
     document.querySelectorAll('[data-i18n]').forEach((el) => {
         const key = el.getAttribute('data-i18n');
-        if (CAGLIARI_TRANSLATIONS[key] && CAGLIARI_TRANSLATIONS[key][lang]) {
-            el.innerHTML = CAGLIARI_TRANSLATIONS[key][lang];
+        // Check global translations first
+        if (translations[key] && translations[key][lang]) {
+            el.innerHTML = translations[key][lang];
+        }
+    });
+
+    // Custom Month translation for Fixtures (if elements exist)
+    document.querySelectorAll('[data-i18n-month]').forEach(el => {
+        const monthIndex = el.getAttribute('data-i18n-month');
+        const isShort = el.hasAttribute('data-i18n-short');
+        const key = `month_${monthIndex}${isShort ? '_short' : ''}`;
+        if (translations[key] && translations[key][lang]) {
+            el.innerText = translations[key][lang];
         }
     });
 };
 
-// Listen for custom 'languageChanged' event from the Navbar
-window.addEventListener('storage', (e) => {
-    if (e.key === 'appLang') {
-        applyCagliariTranslations();
+const syncCagliariLanguage = (notify = true) => {
+    const currentLang = getCurrentCagliariLang();
+
+    if (window._currentCagliariLang === currentLang) {
+        return;
     }
+
+    window._currentCagliariLang = currentLang;
+    window.__appLanguage = currentLang;
+    document.documentElement.lang = currentLang;
+
+    try {
+        window.localStorage?.setItem(LANGUAGE_STORAGE_KEY, currentLang);
+    } catch (error) {
+    }
+
+    applyCagliariTranslations();
+
+    if (notify) {
+        window.dispatchEvent(new CustomEvent('appLanguageChanged', { detail: { lang: currentLang } }));
+    }
+};
+
+window.applyCagliariTranslations = applyCagliariTranslations;
+window.getCagliariTranslation = getCagliariTranslation;
+
+window.addEventListener('appLanguageChanged', (event) => {
+    const nextLang = event.detail?.lang;
+
+    if (nextLang) {
+        window.__appLanguage = nextLang;
+        document.documentElement.lang = nextLang;
+
+        try {
+            window.localStorage?.setItem(LANGUAGE_STORAGE_KEY, nextLang);
+        } catch (error) {
+        }
+    }
+
+    syncCagliariLanguage(false);
 });
 
-// For same tab LanguageContext update, we can poll or use a custom event dispatched by LanguageContext.
-// Let's attach an interval just to ensure it catches up if changed in React 
-setInterval(() => {
-    const currentLang = localStorage.getItem('appLang') || 'it';
-    if (window._currentCagliariLang !== currentLang) {
-        window._currentCagliariLang = currentLang;
-        applyCagliariTranslations();
+window.addEventListener('storage', (event) => {
+    if (event.key !== LANGUAGE_STORAGE_KEY || !event.newValue || !SUPPORTED_LANGUAGES.includes(event.newValue)) {
+        return;
     }
-}, 500);
+
+    window.__appLanguage = event.newValue;
+    document.documentElement.lang = event.newValue;
+    syncCagliariLanguage(false);
+});
 
 // Initial apply
-applyCagliariTranslations();
+syncCagliariLanguage(false);

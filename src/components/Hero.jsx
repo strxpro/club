@@ -174,7 +174,7 @@ export default function Hero() {
 
                 {/* Loading indicator */}
                 {!loaded && (
-                    <div style={{
+                    <div className="hero-loading-shell" style={{
                         position: 'absolute',
                         inset: 0,
                         display: 'flex',
@@ -183,14 +183,11 @@ export default function Hero() {
                         zIndex: 8,
                         pointerEvents: 'none'
                     }}>
-                        <div style={{
-                            width: '40px',
-                            height: '40px',
-                            border: '3px solid rgba(255,255,255,0.15)',
-                            borderTopColor: '#c8102e',
-                            borderRadius: '50%',
-                            animation: 'spin 0.8s linear infinite'
-                        }} />
+                        <div className="hero-loading-card">
+                            <div className="hero-loading-logo" />
+                            <div className="hero-loading-line hero-loading-line-primary" />
+                            <div className="hero-loading-line hero-loading-line-secondary" />
+                        </div>
                     </div>
                 )}
 
@@ -204,12 +201,29 @@ export default function Hero() {
                     width: '100%',
                     margin: '0 auto'
                 }}>
-                    <h1 className="hero-headline">
-                        {t('hero_headline')}
-                    </h1>
-                    <p className="hero-subtitle">
-                        {t('hero_subtitle')}
-                    </p>
+                    <div className="hero-shell">
+                        <img
+                            src="/images/LOGO%20CAGLIARI%20CLUB%20PNG-OK.png"
+                            alt="Cagliari Club Logo"
+                            loading="eager"
+                            decoding="async"
+                            className="hero-logo"
+                        />
+                        <h1 className="hero-headline">
+                            {t('hero_headline')}
+                        </h1>
+                        <p className="hero-subtitle">
+                            {t('hero_subtitle')}
+                        </p>
+                        <img
+                            
+                            src="/images/t.png"
+                            alt="Cagliari Club Gigi Riva STG"
+                            loading="eager"
+                            decoding="async"
+                            className="hero-wordmark"
+                        />
+                    </div>
                 </div>
 
                 {/* Scroll indicator */}
@@ -224,12 +238,6 @@ export default function Hero() {
                 <div className="absolute top-20 left-6 w-12 h-12 border-l-2 border-t-2 border-crimson/30 z-10 hidden md:block" />
                 <div className="absolute bottom-20 right-6 w-12 h-12 border-r-2 border-b-2 border-crimson/30 z-10 hidden md:block" />
             </div>
-
-            <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
         </div>
     );
 }
